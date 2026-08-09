@@ -1,0 +1,63 @@
+# Configuration for the AI Top News site.
+# Edit this file to add/remove news sources or tune the GitHub AI radar.
+
+site:
+  title: "AI Top News"
+  subtitle: "每日 AI 新闻 · GitHub AI 项目雷达"
+  # Timezone label shown in the footer (display only).
+  timezone: "UTC"
+  # Max headlines shown on the page.
+  max_news: 36
+  # Max repositories shown in the radar.
+  max_repos: 30
+
+# RSS / Atom feeds for the "AI 每日新闻" section.
+# `limit` caps how many items we pull from each single feed before merging.
+news_feeds:
+  - name: "MIT Tech Review · AI"
+    url: "https://www.technologyreview.com/topic/artificial-intelligence/feed"
+    limit: 8
+  - name: "VentureBeat · AI"
+    url: "https://venturebeat.com/category/ai/feed/"
+    limit: 8
+  - name: "The Verge · AI"
+    url: "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml"
+    limit: 8
+  - name: "TechCrunch · AI"
+    url: "https://techcrunch.com/category/artificial-intelligence/feed/"
+    limit: 8
+  - name: "Ars Technica · AI"
+    url: "https://arstechnica.com/ai/feed/"
+    limit: 6
+  - name: "Hugging Face Blog"
+    url: "https://huggingface.co/blog/feed.xml"
+    limit: 6
+  - name: "Google DeepMind Blog"
+    url: "https://deepmind.google/blog/rss.xml"
+    limit: 6
+  - name: "Google AI Blog"
+    url: "https://blog.google/technology/ai/rss/"
+    limit: 6
+
+# GitHub "AI 项目雷达" settings.
+github:
+  # Only surface repos created within this many days (a "radar" of new projects).
+  window_days: 45
+  # Repos created within this many days get a "🆕 NEW" badge.
+  new_within_days: 10
+  # Topics to search. Results across all topics are merged & de-duplicated.
+  topics:
+    - "llm"
+    - "large-language-models"
+    - "generative-ai"
+    - "agent"
+    - "ai-agents"
+    - "rag"
+    - "machine-learning"
+    - "deep-learning"
+    - "artificial-intelligence"
+    - "diffusion-models"
+    - "computer-vision"
+    - "mcp"
+  # Ignore tiny repos (stars below this are dropped).
+  min_stars: 40
