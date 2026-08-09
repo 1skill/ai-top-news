@@ -227,6 +227,88 @@ def collect_repos(cfg: dict) -> list[dict]:
 
 
 # --------------------------------------------------------------------------- #
+# Translation (make headlines & descriptions Chinese)
+# --------------------------------------------------------------------------- #
+TRANSLATE_ENDPOINT = "https://translate.googleapis.com/translate_a/single"
+
+
+def _is_cjk(text: str) -> bool:
+    """True if the text is already mostly Chinese (skip translating it)."""
+    cjk = sum(1 for ch in text if "一" <= ch <= "鿿")
+    letters = sum(1 for ch in text if ch.isalpha())
+    return letters > 0 and cjk / max(letters, 1) > 0.3
+
+
+def translate_one(text: str, target: str) -> str:
+    text = (text or "").strip()
+    if not text or _is_cjk(text):
+        return text
+    try:
+        resp = requests.get(
+            TRANSLATE_ENDPOINT,
+            params={
+                "client": "gtx",
+                "sl": "auto",
+                "tl": target,
+                "dt": "t",
+                "q": text,
+            },
+            headers={"User-Agent": USER_AGENT},
+            timeout=15,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        parts = [seg[0] for seg in data[0] if seg and seg[0]]
+        out = "".join(parts).strip()
+        return out or text
+    except Exception as exc:  # noqa: BLE001 - fall back to the original text
+        log(f"[warn] translate failed ({text[:30]!r}): {exc}")
+        return text
+
+
+def localize(cfg: dict, news: list[dict], repos: list[dict]) -> None:
+    """Translate English titles/teasers/descriptions to Chinese, in place.
+
+    Each unique string is translated once; anything that fails keeps its
+    original text so the build never breaks.
+    """
+    tcfg = cfg.get("translate", {}) or {}
+    if not tcfg.get("enabled", True):
+        for n in news:
+            n["title_zh"], n["teaser_zh"] = n["title"], n["teaser"]
+        for r in repos:
+            r["description_zh"] = r["description"]
+        return
+
+    target = tcfg.get("target", "zh-CN")
+    texts: set[str] = set()
+    for n in news:
+        texts.add(n["title"])
+        if n["teaser"]:
+            texts.add(n["teaser"])
+    for r in repos:
+        if r["description"]:
+            texts.add(r["description"])
+
+    mapping: dict[str, str] = {}
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        futures = {pool.submit(translate_one, t, target): t for t in texts}
+        for fut in as_completed(futures):
+            mapping[futures[fut]] = fut.result()
+
+    for n in news:
+        n["title_zh"] = mapping.get(n["title"], n["title"])
+        n["teaser_zh"] = mapping.get(n["teaser"], n["teaser"]) if n["teaser"] else ""
+    for r in repos:
+        r["description_zh"] = (
+            mapping.get(r["description"], r["description"]) if r["description"] else ""
+        )
+
+    changed = sum(1 for k, v in mapping.items() if v != k)
+    log(f"[ok]   translated {changed}/{len(mapping)} strings -> {target}")
+
+
+# --------------------------------------------------------------------------- #
 # Rendering
 # --------------------------------------------------------------------------- #
 def _star_label(stars: int) -> str:
@@ -235,23 +317,31 @@ def _star_label(stars: int) -> str:
     return str(stars)
 
 
-def render_news_cards(news: list[dict]) -> str:
+def render_news_cards(news: list[dict], show_original: bool = True) -> str:
     if not news:
         return '<p class="empty">暂时没有拉取到新闻，稍后自动重试。</p>'
     cards = []
     for n in news:
-        teaser = html.escape(n["teaser"]) if n["teaser"] else ""
+        title_zh = n.get("title_zh") or n["title"]
+        orig = ""
+        if show_original and n["title"] and n["title"] != title_zh:
+            orig = f'<p class="card-orig">{html.escape(n["title"])}</p>'
+        teaser_zh = n.get("teaser_zh") or ""
+        teaser = (
+            f'<p class="card-teaser">{html.escape(teaser_zh)}</p>' if teaser_zh else ""
+        )
         cards.append(
             f"""<a class="card news-card" href="{html.escape(n['link'])}" target="_blank" rel="noopener">
   <div class="card-meta"><span class="badge">{html.escape(n['source'])}</span><span class="ago">{html.escape(n['ago'])}</span></div>
-  <h3 class="card-title">{html.escape(n['title'])}</h3>
-  {f'<p class="card-teaser">{teaser}</p>' if teaser else ''}
+  <h3 class="card-title">{html.escape(title_zh)}</h3>
+  {orig}
+  {teaser}
 </a>"""
         )
     return "\n".join(cards)
 
 
-def render_repo_cards(repos: list[dict]) -> str:
+def render_repo_cards(repos: list[dict], show_original: bool = True) -> str:
     if not repos:
         return '<p class="empty">暂时没有拉取到项目，稍后自动重试。</p>'
     cards = []
@@ -265,11 +355,16 @@ def render_repo_cards(repos: list[dict]) -> str:
             if r["language"]
             else ""
         )
-        desc = html.escape(r["description"]) if r["description"] else "—"
+        desc_zh = r.get("description_zh") or r["description"]
+        desc = html.escape(desc_zh) if desc_zh else "—"
+        orig = ""
+        if show_original and r["description"] and r["description"] != desc_zh:
+            orig = f'<p class="card-orig">{html.escape(r["description"])}</p>'
         cards.append(
             f"""<a class="card repo-card" href="{html.escape(r['url'])}" target="_blank" rel="noopener">
   <div class="card-meta"><span class="repo-name">{html.escape(r['name'])}</span>{new_badge}</div>
   <p class="card-teaser">{desc}</p>
+  {orig}
   <div class="repo-foot">
     <span class="stars">★ {_star_label(r['stars'])}</span>
     {lang}
@@ -287,14 +382,16 @@ def render_html(cfg: dict, news: list[dict], repos: list[dict]) -> str:
     subtitle = site.get("subtitle", "")
     updated = NOW.strftime("%Y-%m-%d %H:%M UTC")
 
+    show_original = bool((cfg.get("translate", {}) or {}).get("show_original", True))
+
     page = HTML_SHELL
     page = page.replace("{{TITLE}}", html.escape(title))
     page = page.replace("{{SUBTITLE}}", html.escape(subtitle))
     page = page.replace("{{UPDATED}}", html.escape(updated))
     page = page.replace("{{NEWS_COUNT}}", str(len(news)))
     page = page.replace("{{REPO_COUNT}}", str(len(repos)))
-    page = page.replace("{{NEWS_CARDS}}", render_news_cards(news))
-    page = page.replace("{{REPO_CARDS}}", render_repo_cards(repos))
+    page = page.replace("{{NEWS_CARDS}}", render_news_cards(news, show_original))
+    page = page.replace("{{REPO_CARDS}}", render_repo_cards(repos, show_original))
     page = page.replace("{{YEAR}}", str(NOW.year))
     return page
 
@@ -333,11 +430,26 @@ HTML_SHELL = """<!doctype html>
     font-size: .82rem; align-items: center; }
   .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--new);
     display: inline-block; margin-right: 6px; vertical-align: middle; }
-  section { margin-top: 34px; }
+  /* Tab switcher */
+  .tabs { position: sticky; top: 0; z-index: 10; display: flex; gap: 8px;
+    background: var(--bg); padding: 12px 0 10px; margin-top: 14px;
+    border-bottom: 1px solid var(--border); }
+  .tab { font: inherit; cursor: pointer; border: 1px solid var(--border);
+    background: var(--panel); color: var(--muted); padding: 8px 16px;
+    border-radius: 999px; font-weight: 600; font-size: .92rem;
+    transition: background .12s ease, color .12s ease, border-color .12s ease; }
+  .tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .tab .tcount { opacity: .85; font-size: .76rem; margin-left: 4px; }
+  .panel { display: none; }
+  .panel.active { display: block; animation: fade .18s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; } }
+  section { margin-top: 20px; }
   .sec-head { display: flex; align-items: baseline; gap: 10px; margin: 0 0 14px;
     border-bottom: 1px solid var(--border); padding-bottom: 8px; }
   .sec-head h2 { font-size: 1.25rem; margin: 0; }
   .sec-head .count { color: var(--muted); font-size: .82rem; }
+  .card-orig { color: var(--muted); font-size: .76rem; margin: 4px 0 0;
+    font-style: italic; }
   .grid { display: grid; gap: 12px;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
   .card {
@@ -386,19 +498,42 @@ HTML_SHELL = """<!doctype html>
       </div>
     </header>
 
-    <section id="news">
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-target="news" role="tab">📰 每日新闻<span class="tcount">{{NEWS_COUNT}}</span></button>
+      <button class="tab" data-target="radar" role="tab">🛰️ 项目雷达<span class="tcount">{{REPO_COUNT}}</span></button>
+    </nav>
+
+    <section id="news" class="panel active" role="tabpanel">
       <div class="sec-head"><h2>📰 AI 每日新闻</h2><span class="count">{{NEWS_COUNT}} 条 · 按时间排序</span></div>
       <div class="grid">
         {{NEWS_CARDS}}
       </div>
     </section>
 
-    <section id="radar">
+    <section id="radar" class="panel" role="tabpanel">
       <div class="sec-head"><h2>🛰️ GitHub AI 项目雷达</h2><span class="count">{{REPO_COUNT}} 个新兴项目 · 按星标排序</span></div>
       <div class="grid">
         {{REPO_CARDS}}
       </div>
     </section>
+
+    <script>
+      (function () {
+        var tabs = document.querySelectorAll('.tab');
+        var panels = document.querySelectorAll('.panel');
+        function activate(target) {
+          tabs.forEach(function (t) { t.classList.toggle('active', t.dataset.target === target); });
+          panels.forEach(function (p) { p.classList.toggle('active', p.id === target); });
+          if (history.replaceState) history.replaceState(null, '', '#' + target);
+        }
+        tabs.forEach(function (t) {
+          t.addEventListener('click', function () { activate(t.dataset.target); });
+        });
+        // Honor a #radar / #news hash on load so links can deep-link a tab.
+        var hash = (location.hash || '').replace('#', '');
+        if (hash === 'radar' || hash === 'news') activate(hash);
+      })();
+    </script>
 
     <footer>
       <p>{{TITLE}} · 数据来自各 RSS 源与 GitHub Search API · 由 GitHub Actions 每日自动构建</p>
@@ -419,6 +554,9 @@ def main() -> int:
     news = collect_news(cfg)
     log("== collecting github radar ==")
     repos = collect_repos(cfg)
+
+    log("== translating to Chinese ==")
+    localize(cfg, news, repos)
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     (OUT_DIR / "index.html").write_text(render_html(cfg, news, repos), encoding="utf-8")
