@@ -227,6 +227,172 @@ def collect_repos(cfg: dict) -> list[dict]:
 
 
 # --------------------------------------------------------------------------- #
+# arXiv papers (research frontier)
+# --------------------------------------------------------------------------- #
+ARXIV_RSS = "https://rss.arxiv.org/rss/{cat}"
+
+
+def _clean_arxiv_title(title: str) -> str:
+    # Older arXiv titles append " (arXiv:xxxx [cs.AI])"; strip that tail.
+    idx = title.find(" (arXiv:")
+    return (title[:idx] if idx != -1 else title).strip()
+
+
+def fetch_arxiv(cat: str) -> list[dict]:
+    try:
+        resp = requests.get(
+            ARXIV_RSS.format(cat=cat), headers={"User-Agent": USER_AGENT}, timeout=25
+        )
+        resp.raise_for_status()
+    except Exception as exc:  # noqa: BLE001
+        log(f"[warn] arxiv failed: {cat}: {exc}")
+        return []
+    parsed = feedparser.parse(resp.content)
+    items = []
+    for e in parsed.entries:
+        title = _clean_arxiv_title((e.get("title") or "").strip())
+        link = (e.get("link") or "").strip()
+        if not title or not link:
+            continue
+        published = _parse_published(e)
+        summary = _strip_html(e.get("summary") or "")
+        low = summary.lower()
+        if "abstract:" in low:  # new arXiv feed prefixes an announce-type header
+            summary = summary[low.index("abstract:") + len("abstract:") :].strip()
+        items.append(
+            {
+                "title": title,
+                "link": link,
+                "source": f"arXiv · {cat}",
+                "published_ts": published.timestamp() if published else 0.0,
+                "ago": human_delta(published),
+                "teaser": summary[:200],
+            }
+        )
+    log(f"[ok]   arxiv: {cat} -> {len(items)} papers")
+    return items
+
+
+def collect_papers(cfg: dict) -> list[dict]:
+    acfg = cfg.get("arxiv", {}) or {}
+    if not acfg.get("enabled", True):
+        return []
+    cats = acfg.get("categories", ["cs.AI", "cs.CL", "cs.LG"])
+    results: list[dict] = []
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        for r in pool.map(fetch_arxiv, cats):
+            results.extend(r)
+    seen: set[str] = set()
+    unique: list[dict] = []
+    for item in sorted(results, key=lambda x: x["published_ts"], reverse=True):
+        if item["link"] in seen:
+            continue
+        seen.add(item["link"])
+        unique.append(item)
+    return unique[: int(acfg.get("max_items", 24))]
+
+
+# --------------------------------------------------------------------------- #
+# Hugging Face trending models (what people are actually running)
+# --------------------------------------------------------------------------- #
+HF_MODELS = "https://huggingface.co/api/models"
+
+
+def collect_models(cfg: dict) -> list[dict]:
+    mcfg = cfg.get("huggingface", {}) or {}
+    if not mcfg.get("enabled", True):
+        return []
+    limit = int(mcfg.get("max_items", 24))
+    try:
+        resp = requests.get(
+            HF_MODELS,
+            params={"sort": "trendingScore", "direction": "-1", "limit": limit},
+            headers={"User-Agent": USER_AGENT},
+            timeout=25,
+        )
+        resp.raise_for_status()
+    except Exception as exc:  # noqa: BLE001
+        log(f"[warn] huggingface failed: {exc}")
+        return []
+    out = []
+    for m in resp.json():
+        mid = m.get("id") or m.get("modelId")
+        if not mid:
+            continue
+        out.append(
+            {
+                "name": mid,
+                "url": f"https://huggingface.co/{mid}",
+                "likes": m.get("likes", 0),
+                "downloads": m.get("downloads", 0),
+                "task": m.get("pipeline_tag") or "",
+            }
+        )
+    log(f"[ok]   huggingface -> {len(out)} models")
+    return out[:limit]
+
+
+# --------------------------------------------------------------------------- #
+# Hacker News AI discussions (community & product pulse)
+# --------------------------------------------------------------------------- #
+HN_SEARCH = "https://hn.algolia.com/api/v1/search"
+
+
+def fetch_hn(query: str, min_points: int) -> list[dict]:
+    try:
+        resp = requests.get(
+            HN_SEARCH,
+            params={
+                "query": query,
+                "tags": "story",
+                "numericFilters": f"points>={min_points}",
+                "hitsPerPage": 30,
+            },
+            headers={"User-Agent": USER_AGENT},
+            timeout=25,
+        )
+        resp.raise_for_status()
+    except Exception as exc:  # noqa: BLE001
+        log(f"[warn] hn failed: {query}: {exc}")
+        return []
+    items = []
+    for h in resp.json().get("hits", []):
+        title = (h.get("title") or "").strip()
+        oid = h.get("objectID")
+        if not title or not oid:
+            continue
+        ts = h.get("created_at_i")
+        when = dt.datetime.fromtimestamp(ts, dt.timezone.utc) if ts else None
+        items.append(
+            {
+                "title": title,
+                "link": f"https://news.ycombinator.com/item?id={oid}",
+                "article": h.get("url") or "",
+                "source": "Hacker News",
+                "points": h.get("points", 0),
+                "comments": h.get("num_comments", 0),
+                "ago": human_delta(when),
+            }
+        )
+    log(f"[ok]   hn: {query!r} -> {len(items)} stories")
+    return items
+
+
+def collect_hackernews(cfg: dict) -> list[dict]:
+    hcfg = cfg.get("hacker_news", {}) or {}
+    if not hcfg.get("enabled", True):
+        return []
+    queries = hcfg.get("queries", ["AI", "LLM"])
+    min_points = int(hcfg.get("min_points", 50))
+    by_id: dict[str, dict] = {}
+    for q in queries:
+        for it in fetch_hn(q, min_points):
+            by_id[it["link"]] = it  # de-duplicate by HN story id
+    items = sorted(by_id.values(), key=lambda x: x["points"], reverse=True)
+    return items[: int(hcfg.get("max_items", 20))]
+
+
+# --------------------------------------------------------------------------- #
 # Translation (make headlines & descriptions Chinese)
 # --------------------------------------------------------------------------- #
 TRANSLATE_ENDPOINT = "https://translate.googleapis.com/translate_a/single"
@@ -266,26 +432,46 @@ def translate_one(text: str, target: str) -> str:
         return text
 
 
-def localize(cfg: dict, news: list[dict], repos: list[dict]) -> None:
+def _fill_original(items: list[dict]) -> None:
+    for it in items:
+        it["title_zh"] = it.get("title", "")
+        it["teaser_zh"] = it.get("teaser", "")
+
+
+def localize(
+    cfg: dict,
+    news: list[dict],
+    repos: list[dict],
+    papers: list[dict] | None = None,
+    hn: list[dict] | None = None,
+) -> None:
     """Translate English titles/teasers/descriptions to Chinese, in place.
 
     Each unique string is translated once; anything that fails keeps its
     original text so the build never breaks.
     """
+    papers = papers or []
+    hn = hn or []
     tcfg = cfg.get("translate", {}) or {}
     if not tcfg.get("enabled", True):
         for n in news:
             n["title_zh"], n["teaser_zh"] = n["title"], n["teaser"]
+        _fill_original(papers)
+        for h in hn:
+            h["title_zh"] = h["title"]
         for r in repos:
             r["description_zh"] = r["description"]
         return
 
     target = tcfg.get("target", "zh-CN")
     texts: set[str] = set()
-    for n in news:
-        texts.add(n["title"])
-        if n["teaser"]:
-            texts.add(n["teaser"])
+    for group in (news, papers):
+        for it in group:
+            texts.add(it["title"])
+            if it.get("teaser"):
+                texts.add(it["teaser"])
+    for h in hn:
+        texts.add(h["title"])
     for r in repos:
         if r["description"]:
             texts.add(r["description"])
@@ -296,9 +482,14 @@ def localize(cfg: dict, news: list[dict], repos: list[dict]) -> None:
         for fut in as_completed(futures):
             mapping[futures[fut]] = fut.result()
 
-    for n in news:
-        n["title_zh"] = mapping.get(n["title"], n["title"])
-        n["teaser_zh"] = mapping.get(n["teaser"], n["teaser"]) if n["teaser"] else ""
+    for group in (news, papers):
+        for it in group:
+            it["title_zh"] = mapping.get(it["title"], it["title"])
+            it["teaser_zh"] = (
+                mapping.get(it["teaser"], it["teaser"]) if it.get("teaser") else ""
+            )
+    for h in hn:
+        h["title_zh"] = mapping.get(h["title"], h["title"])
     for r in repos:
         r["description_zh"] = (
             mapping.get(r["description"], r["description"]) if r["description"] else ""
@@ -376,22 +567,150 @@ def render_repo_cards(repos: list[dict], show_original: bool = True) -> str:
     return "\n".join(cards)
 
 
-def render_html(cfg: dict, news: list[dict], repos: list[dict]) -> str:
+def render_paper_cards(papers: list[dict], show_original: bool = True) -> str:
+    if not papers:
+        return '<p class="empty">暂时没有拉取到论文，稍后自动重试。</p>'
+    cards = []
+    for p in papers:
+        title_zh = p.get("title_zh") or p["title"]
+        orig = ""
+        if show_original and p["title"] and p["title"] != title_zh:
+            orig = f'<p class="card-orig">{html.escape(p["title"])}</p>'
+        teaser_zh = p.get("teaser_zh") or ""
+        teaser = (
+            f'<p class="card-teaser">{html.escape(teaser_zh)}</p>' if teaser_zh else ""
+        )
+        cards.append(
+            f"""<a class="card news-card" href="{html.escape(p['link'])}" target="_blank" rel="noopener">
+  <div class="card-meta"><span class="badge">{html.escape(p['source'])}</span><span class="ago">{html.escape(p['ago'])}</span></div>
+  <h3 class="card-title">{html.escape(title_zh)}</h3>
+  {orig}
+  {teaser}
+</a>"""
+        )
+    return "\n".join(cards)
+
+
+def render_model_cards(models: list[dict]) -> str:
+    if not models:
+        return '<p class="empty">暂时没有拉取到模型，稍后自动重试。</p>'
+    cards = []
+    for m in models:
+        task = (
+            f'<span class="topic">{html.escape(m["task"])}</span>' if m["task"] else ""
+        )
+        cards.append(
+            f"""<a class="card repo-card" href="{html.escape(m['url'])}" target="_blank" rel="noopener">
+  <div class="card-meta"><span class="repo-name">{html.escape(m['name'])}</span></div>
+  <div class="repo-foot">
+    <span class="stars">❤ {_star_label(m['likes'])}</span>
+    <span class="lang">↓ {_star_label(m['downloads'])}</span>
+  </div>
+  <div class="topics">{task}</div>
+</a>"""
+        )
+    return "\n".join(cards)
+
+
+def render_hn_cards(items: list[dict], show_original: bool = True) -> str:
+    if not items:
+        return '<p class="empty">暂时没有拉取到讨论，稍后自动重试。</p>'
+    cards = []
+    for h in items:
+        title_zh = h.get("title_zh") or h["title"]
+        orig = ""
+        if show_original and h["title"] and h["title"] != title_zh:
+            orig = f'<p class="card-orig">{html.escape(h["title"])}</p>'
+        cards.append(
+            f"""<a class="card news-card" href="{html.escape(h['link'])}" target="_blank" rel="noopener">
+  <div class="card-meta"><span class="badge">{html.escape(h['source'])}</span><span class="ago">{html.escape(h['ago'])}</span></div>
+  <h3 class="card-title">{html.escape(title_zh)}</h3>
+  {orig}
+  <div class="repo-foot">
+    <span class="stars">▲ {h['points']}</span>
+    <span class="ago">💬 {h['comments']} 讨论</span>
+  </div>
+</a>"""
+        )
+    return "\n".join(cards)
+
+
+def render_html(
+    cfg: dict,
+    news: list[dict],
+    repos: list[dict],
+    papers: list[dict] | None = None,
+    models: list[dict] | None = None,
+    hn: list[dict] | None = None,
+) -> str:
+    papers = papers or []
+    models = models or []
+    hn = hn or []
     site = cfg.get("site", {})
     title = site.get("title", "AI Top News")
     subtitle = site.get("subtitle", "")
     updated = NOW.strftime("%Y-%m-%d %H:%M UTC")
-
     show_original = bool((cfg.get("translate", {}) or {}).get("show_original", True))
+
+    # Ordered sections. `always` ones show even when empty; the rest are
+    # hidden entirely if a source returned nothing that day.
+    sections = [
+        {
+            "id": "news", "icon": "📰", "label": "每日新闻", "count": len(news),
+            "sub": f"{len(news)} 条 · 按时间排序",
+            "cards": render_news_cards(news, show_original), "always": True,
+        },
+        {
+            "id": "papers", "icon": "📄", "label": "arXiv 论文", "count": len(papers),
+            "sub": f"{len(papers)} 篇 · 最新提交",
+            "cards": render_paper_cards(papers, show_original),
+        },
+        {
+            "id": "models", "icon": "🤗", "label": "热门模型", "count": len(models),
+            "sub": f"{len(models)} 个 · Hugging Face 趋势",
+            "cards": render_model_cards(models),
+        },
+        {
+            "id": "hn", "icon": "💬", "label": "HN 热议", "count": len(hn),
+            "sub": f"{len(hn)} 条 · 按热度排序",
+            "cards": render_hn_cards(hn, show_original),
+        },
+        {
+            "id": "radar", "icon": "🛰️", "label": "项目雷达", "count": len(repos),
+            "sub": f"{len(repos)} 个新兴项目 · 按星标排序",
+            "cards": render_repo_cards(repos, show_original), "always": True,
+        },
+    ]
+    kept = [s for s in sections if s["count"] > 0 or s.get("always")]
+
+    tabs, panels = [], []
+    for i, s in enumerate(kept):
+        active = " active" if i == 0 else ""
+        tabs.append(
+            f'<button class="tab{active}" data-target="{s["id"]}" role="tab">'
+            f'{s["icon"]} {s["label"]}<span class="tcount">{s["count"]}</span></button>'
+        )
+        panels.append(
+            f'''<section id="{s['id']}" class="panel{active}" role="tabpanel">
+      <div class="sec-head"><h2>{s['icon']} {s['label']}</h2><span class="count">{s['sub']}</span></div>
+      <div class="grid">
+        {s['cards']}
+      </div>
+    </section>'''
+        )
+
+    meta = (
+        f'<span><span class="dot"></span>最后更新 {html.escape(updated)}</span>'
+        + "".join(f'<span>· {s["count"]} {s["label"]}</span>' for s in kept)
+        + '<span>· 每天早晚各更新一次</span>'
+    )
 
     page = HTML_SHELL
     page = page.replace("{{TITLE}}", html.escape(title))
     page = page.replace("{{SUBTITLE}}", html.escape(subtitle))
-    page = page.replace("{{UPDATED}}", html.escape(updated))
-    page = page.replace("{{NEWS_COUNT}}", str(len(news)))
-    page = page.replace("{{REPO_COUNT}}", str(len(repos)))
-    page = page.replace("{{NEWS_CARDS}}", render_news_cards(news, show_original))
-    page = page.replace("{{REPO_CARDS}}", render_repo_cards(repos, show_original))
+    page = page.replace("{{META}}", meta)
+    page = page.replace("{{TABS}}", "\n      ".join(tabs))
+    page = page.replace("{{PANELS}}", "\n    ".join(panels))
     page = page.replace("{{YEAR}}", str(NOW.year))
     return page
 
@@ -491,52 +810,42 @@ HTML_SHELL = """<!doctype html>
       <h1>{{TITLE}}</h1>
       <p class="subtitle">{{SUBTITLE}}</p>
       <div class="meta-row">
-        <span><span class="dot"></span>最后更新 {{UPDATED}}</span>
-        <span>· {{NEWS_COUNT}} 条新闻</span>
-        <span>· {{REPO_COUNT}} 个项目</span>
-        <span>· 每日自动刷新</span>
+        {{META}}
       </div>
     </header>
 
     <nav class="tabs" role="tablist">
-      <button class="tab active" data-target="news" role="tab">📰 每日新闻<span class="tcount">{{NEWS_COUNT}}</span></button>
-      <button class="tab" data-target="radar" role="tab">🛰️ 项目雷达<span class="tcount">{{REPO_COUNT}}</span></button>
+      {{TABS}}
     </nav>
 
-    <section id="news" class="panel active" role="tabpanel">
-      <div class="sec-head"><h2>📰 AI 每日新闻</h2><span class="count">{{NEWS_COUNT}} 条 · 按时间排序</span></div>
-      <div class="grid">
-        {{NEWS_CARDS}}
-      </div>
-    </section>
-
-    <section id="radar" class="panel" role="tabpanel">
-      <div class="sec-head"><h2>🛰️ GitHub AI 项目雷达</h2><span class="count">{{REPO_COUNT}} 个新兴项目 · 按星标排序</span></div>
-      <div class="grid">
-        {{REPO_CARDS}}
-      </div>
-    </section>
+    {{PANELS}}
 
     <script>
       (function () {
         var tabs = document.querySelectorAll('.tab');
         var panels = document.querySelectorAll('.panel');
         function activate(target) {
-          tabs.forEach(function (t) { t.classList.toggle('active', t.dataset.target === target); });
+          var known = false;
+          tabs.forEach(function (t) {
+            var on = t.dataset.target === target;
+            t.classList.toggle('active', on);
+            if (on) known = true;
+          });
+          if (!known) return;
           panels.forEach(function (p) { p.classList.toggle('active', p.id === target); });
           if (history.replaceState) history.replaceState(null, '', '#' + target);
         }
         tabs.forEach(function (t) {
           t.addEventListener('click', function () { activate(t.dataset.target); });
         });
-        // Honor a #radar / #news hash on load so links can deep-link a tab.
+        // Honor a #section hash on load so links can deep-link a tab.
         var hash = (location.hash || '').replace('#', '');
-        if (hash === 'radar' || hash === 'news') activate(hash);
+        if (hash) activate(hash);
       })();
     </script>
 
     <footer>
-      <p>{{TITLE}} · 数据来自各 RSS 源与 GitHub Search API · 由 GitHub Actions 每日自动构建</p>
+      <p>{{TITLE}} · 数据来自 RSS 新闻源、arXiv、Hugging Face、Hacker News 与 GitHub · 由 GitHub Actions 每天自动构建</p>
       <p>© {{YEAR}} · <a href="https://github.com/1skill/ai-top-news">源代码</a></p>
     </footer>
   </div>
@@ -552,19 +861,30 @@ def main() -> int:
     cfg = load_config()
     log("== collecting news ==")
     news = collect_news(cfg)
+    log("== collecting arxiv papers ==")
+    papers = collect_papers(cfg)
+    log("== collecting huggingface models ==")
+    models = collect_models(cfg)
+    log("== collecting hacker news ==")
+    hn = collect_hackernews(cfg)
     log("== collecting github radar ==")
     repos = collect_repos(cfg)
 
     log("== translating to Chinese ==")
-    localize(cfg, news, repos)
+    localize(cfg, news, repos, papers, hn)
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    (OUT_DIR / "index.html").write_text(render_html(cfg, news, repos), encoding="utf-8")
+    (OUT_DIR / "index.html").write_text(
+        render_html(cfg, news, repos, papers, models, hn), encoding="utf-8"
+    )
     (OUT_DIR / "data.json").write_text(
         json.dumps(
             {
                 "generated_at": NOW.isoformat(),
                 "news": news,
+                "papers": papers,
+                "models": models,
+                "hacker_news": hn,
                 "repos": repos,
             },
             ensure_ascii=False,
@@ -575,8 +895,12 @@ def main() -> int:
     # A .nojekyll file keeps GitHub Pages from touching our output.
     (OUT_DIR / ".nojekyll").write_text("", encoding="utf-8")
 
-    log(f"== done: {len(news)} news, {len(repos)} repos -> {OUT_DIR} ==")
-    if not news and not repos:
+    total = len(news) + len(papers) + len(models) + len(hn) + len(repos)
+    log(
+        f"== done: {len(news)} news, {len(papers)} papers, {len(models)} models, "
+        f"{len(hn)} hn, {len(repos)} repos -> {OUT_DIR} =="
+    )
+    if total == 0:
         log("[error] no data collected at all")
         return 1
     return 0

@@ -48,6 +48,33 @@ news_feeds:
     url: "https://blog.google/technology/ai/rss/"
     limit: 6
 
+# arXiv 论文雷达（研究前沿）。每个分类的最新提交合并去重后展示。
+arxiv:
+  enabled: true
+  categories:
+    - "cs.AI"   # 人工智能
+    - "cs.CL"   # 计算语言学 / NLP
+    - "cs.LG"   # 机器学习
+    - "cs.CV"   # 计算机视觉
+  max_items: 24
+
+# Hugging Face 热门模型（大家正在用什么）。按趋势分数排序。
+huggingface:
+  enabled: true
+  max_items: 24
+
+# Hacker News AI 热议（社区 / 产品风向）。多关键词搜索后按热度合并。
+hacker_news:
+  enabled: true
+  queries:
+    - "AI"
+    - "LLM"
+    - "GPT"
+    - "machine learning"
+    - "agent"
+  min_points: 50   # 过滤掉热度过低的帖子
+  max_items: 20
+
 # GitHub "AI 项目雷达" settings.
 github:
   # Only surface repos created within this many days (a "radar" of new projects).
