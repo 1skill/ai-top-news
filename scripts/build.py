@@ -229,19 +229,30 @@ def collect_repos(cfg: dict) -> list[dict]:
 # --------------------------------------------------------------------------- #
 # arXiv papers (research frontier)
 # --------------------------------------------------------------------------- #
-ARXIV_RSS = "https://rss.arxiv.org/rss/{cat}"
+# The official API returns the newest submissions on demand — unlike the RSS
+# feed, which is empty on days with no announcement (e.g. weekends).
+ARXIV_API = "http://export.arxiv.org/api/query"
 
 
 def _clean_arxiv_title(title: str) -> str:
     # Older arXiv titles append " (arXiv:xxxx [cs.AI])"; strip that tail.
     idx = title.find(" (arXiv:")
-    return (title[:idx] if idx != -1 else title).strip()
+    title = title[:idx] if idx != -1 else title
+    return " ".join(title.split())  # collapse the newlines arXiv inserts
 
 
-def fetch_arxiv(cat: str) -> list[dict]:
+def fetch_arxiv(cat: str, per_cat: int) -> list[dict]:
     try:
         resp = requests.get(
-            ARXIV_RSS.format(cat=cat), headers={"User-Agent": USER_AGENT}, timeout=25
+            ARXIV_API,
+            params={
+                "search_query": f"cat:{cat}",
+                "sortBy": "submittedDate",
+                "sortOrder": "descending",
+                "max_results": per_cat,
+            },
+            headers={"User-Agent": USER_AGENT},
+            timeout=30,
         )
         resp.raise_for_status()
     except Exception as exc:  # noqa: BLE001
@@ -251,14 +262,11 @@ def fetch_arxiv(cat: str) -> list[dict]:
     items = []
     for e in parsed.entries:
         title = _clean_arxiv_title((e.get("title") or "").strip())
-        link = (e.get("link") or "").strip()
+        link = (e.get("link") or e.get("id") or "").strip()
         if not title or not link:
             continue
         published = _parse_published(e)
-        summary = _strip_html(e.get("summary") or "")
-        low = summary.lower()
-        if "abstract:" in low:  # new arXiv feed prefixes an announce-type header
-            summary = summary[low.index("abstract:") + len("abstract:") :].strip()
+        summary = " ".join(_strip_html(e.get("summary") or "").split())
         items.append(
             {
                 "title": title,
@@ -278,9 +286,11 @@ def collect_papers(cfg: dict) -> list[dict]:
     if not acfg.get("enabled", True):
         return []
     cats = acfg.get("categories", ["cs.AI", "cs.CL", "cs.LG"])
+    max_items = int(acfg.get("max_items", 24))
+    per_cat = max(8, max_items // max(len(cats), 1) + 4)
     results: list[dict] = []
     with ThreadPoolExecutor(max_workers=6) as pool:
-        for r in pool.map(fetch_arxiv, cats):
+        for r in pool.map(lambda c: fetch_arxiv(c, per_cat), cats):
             results.extend(r)
     seen: set[str] = set()
     unique: list[dict] = []
@@ -289,7 +299,7 @@ def collect_papers(cfg: dict) -> list[dict]:
             continue
         seen.add(item["link"])
         unique.append(item)
-    return unique[: int(acfg.get("max_items", 24))]
+    return unique[:max_items]
 
 
 # --------------------------------------------------------------------------- #
