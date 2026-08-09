@@ -1,0 +1,60 @@
+name: Build & Deploy AI Top News
+
+on:
+  # Run every day at 06:00 UTC (~14:00 Beijing time).
+  schedule:
+    - cron: "0 6 * * *"
+  # Allow manual runs from the Actions tab.
+  workflow_dispatch:
+  # Rebuild whenever the site code changes.
+  push:
+    branches: [main]
+
+# Least-privilege permissions needed to publish to GitHub Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one Pages deployment at a time; newer runs win.
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build site
+        run: python scripts/build.py
+        env:
+          # Grants a higher GitHub Search rate limit during the build.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
