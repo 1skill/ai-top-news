@@ -1,9 +1,12 @@
 name: Build & Deploy AI Top News
 
 on:
-  # Run every day at 06:00 UTC (~14:00 Beijing time).
+  # Twice a day, in US Pacific time:
+  #   14:00 UTC = 07:00 PDT (morning)   |   02:00 UTC = 19:00 PDT (after dinner)
+  # Cron is fixed to UTC, so during PST (winter) these land at 06:00 / 18:00 local.
   schedule:
-    - cron: "0 6 * * *"
+    - cron: "0 14 * * *"
+    - cron: "0 2 * * *"
   # Allow manual runs from the Actions tab.
   workflow_dispatch:
   # Rebuild whenever the site code changes.
