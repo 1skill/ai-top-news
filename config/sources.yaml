@@ -2,7 +2,7 @@
 # Edit this file to add/remove news sources or tune the GitHub AI radar.
 
 site:
-  title: "AI Top News"
+  title: "AI 头条"
   subtitle: "每日 AI 新闻 · GitHub AI 项目雷达"
   # Timezone label shown in the footer (display only).
   timezone: "UTC"
@@ -10,6 +10,15 @@ site:
   max_news: 36
   # Max repositories shown in the radar.
   max_repos: 30
+
+# Translate English headlines / descriptions into Chinese at build time.
+# Falls back to the original text if a translation call fails, so the
+# site is never broken by a translation hiccup.
+translate:
+  enabled: true
+  target: "zh-CN"
+  # Show the original English text as a small line under the Chinese.
+  show_original: true
 
 # RSS / Atom feeds for the "AI 每日新闻" section.
 # `limit` caps how many items we pull from each single feed before merging.
