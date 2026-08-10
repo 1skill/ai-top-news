@@ -430,6 +430,7 @@ def collect_sites() -> list[dict]:
                 "category": (s.get("category") or "未分类").strip(),
                 "desc": (s.get("desc") or "").strip(),
                 "host": url.split("//")[-1].strip("/"),
+                "thumb": (s.get("thumb") or "").strip(),
             }
         )
     log(f"[ok]   sites: {len(sites)} curated sites")
@@ -680,10 +681,37 @@ def render_hn_cards(items: list[dict], show_original: bool = True) -> str:
 
 
 def _mshot(url: str, width: int = 640) -> str:
-    # WordPress mShots: free, keyless, on-demand screenshots. External images
-    # load fine on GitHub Pages (no CSP), so we can use them for thumbnails.
+    # WordPress mShots: free, keyless, on-demand screenshots.
     quoted = urllib.parse.quote(url, safe="")
     return f"https://s.wordpress.com/mshots/v1/{quoted}?w={width}"
+
+
+def _thumb_img(site: dict, name_attr: str) -> str:
+    """Build a screenshot <img> with a three-step fallback chain.
+
+    thum.io renders reliably and fast; if it fails we fall back to mShots,
+    and finally to the site's favicon so a card is never blank. A site may
+    also pin its own image via a `thumb:` field in sites.yaml.
+
+    All URLs are plain (no quotes / no '&'), so they inline safely into the
+    double-quoted onerror attribute below.
+    """
+    if site.get("thumb"):
+        return f'<img loading="lazy" src="{html.escape(site["thumb"])}" alt="{name_attr}">'
+    url = site["url"]
+    thumio = f"https://image.thum.io/get/width/640/crop/450/{url}"
+    mshots = _mshot(url)
+    favicon = f"https://icons.duckduckgo.com/ip3/{site['host']}.ico"
+    # First error -> try mShots; if that also errors -> favicon (as a small logo).
+    onerror = (
+        "this.onerror=function(){this.onerror=null;"
+        "this.classList.add('thumb-fallback');"
+        f"this.src='{favicon}'}};this.src='{mshots}'"
+    )
+    return (
+        f'<img loading="lazy" src="{thumio}" '
+        f'onerror="{onerror}" alt="{name_attr}">'
+    )
 
 
 def render_sites_panel(sites: list[dict]) -> str:
@@ -705,7 +733,7 @@ def render_sites_panel(sites: list[dict]) -> str:
             host = html.escape(s["host"])
             thumbs.append(
                 f"""<a class="site-card" href="{url}" target="_blank" rel="noopener">
-  <div class="thumb"><img loading="lazy" src="{html.escape(_mshot(s['url']))}" alt="{name}"></div>
+  <div class="thumb">{_thumb_img(s, name)}</div>
   <div class="site-info"><span class="site-name">{name}</span>
     {f'<p class="site-desc">{desc}</p>' if desc else ''}
     <span class="site-host">{host}</span>
@@ -947,8 +975,11 @@ HTML_SHELL = """<!doctype html>
     border-radius: 14px; overflow: hidden; text-decoration: none; color: inherit;
     box-shadow: var(--shadow); transition: transform .12s ease, border-color .12s ease; }
   .site-card:hover { transform: translateY(-2px); border-color: var(--accent); }
-  .thumb { aspect-ratio: 16 / 10; background: var(--accent-soft); overflow: hidden; }
+  .thumb { aspect-ratio: 16 / 10; background: var(--accent-soft); overflow: hidden;
+    display: flex; align-items: center; justify-content: center; }
   .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .thumb img.thumb-fallback { width: 56px; height: 56px; object-fit: contain;
+    opacity: .8; }
   .site-info { padding: 11px 13px 13px; }
   .site-name { font-weight: 700; font-size: .95rem; }
   .site-desc { color: var(--muted); font-size: .82rem; margin: 5px 0 0; }
