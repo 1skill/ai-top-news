@@ -20,6 +20,7 @@ import json
 import os
 import pathlib
 import sys
+import urllib.parse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import feedparser
@@ -28,6 +29,7 @@ import yaml
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 CONFIG_PATH = ROOT / "config" / "sources.yaml"
+SITES_PATH = ROOT / "config" / "sites.yaml"
 OUT_DIR = ROOT / "public"
 
 USER_AGENT = "ai-top-news-bot/1.0 (+https://github.com/1skill/ai-top-news)"
@@ -403,6 +405,38 @@ def collect_hackernews(cfg: dict) -> list[dict]:
 
 
 # --------------------------------------------------------------------------- #
+# Curated design / inspiration sites (a growing, hand-picked bookmark wall)
+# --------------------------------------------------------------------------- #
+def collect_sites() -> list[dict]:
+    """Load the hand-curated sites from config/sites.yaml (if present)."""
+    if not SITES_PATH.exists():
+        return []
+    try:
+        with open(SITES_PATH, "r", encoding="utf-8") as fh:
+            data = yaml.safe_load(fh) or {}
+    except Exception as exc:  # noqa: BLE001
+        log(f"[warn] sites.yaml failed: {exc}")
+        return []
+    sites = []
+    for s in data.get("sites", []):
+        url = (s.get("url") or "").strip()
+        name = (s.get("name") or "").strip()
+        if not url or not name:
+            continue
+        sites.append(
+            {
+                "name": name,
+                "url": url,
+                "category": (s.get("category") or "未分类").strip(),
+                "desc": (s.get("desc") or "").strip(),
+                "host": url.split("//")[-1].strip("/"),
+            }
+        )
+    log(f"[ok]   sites: {len(sites)} curated sites")
+    return sites
+
+
+# --------------------------------------------------------------------------- #
 # Translation (make headlines & descriptions Chinese)
 # --------------------------------------------------------------------------- #
 TRANSLATE_ENDPOINT = "https://translate.googleapis.com/translate_a/single"
@@ -645,6 +679,84 @@ def render_hn_cards(items: list[dict], show_original: bool = True) -> str:
     return "\n".join(cards)
 
 
+def _mshot(url: str, width: int = 640) -> str:
+    # WordPress mShots: free, keyless, on-demand screenshots. External images
+    # load fine on GitHub Pages (no CSP), so we can use them for thumbnails.
+    quoted = urllib.parse.quote(url, safe="")
+    return f"https://s.wordpress.com/mshots/v1/{quoted}?w={width}"
+
+
+def render_sites_panel(sites: list[dict]) -> str:
+    if not sites:
+        return '<p class="empty">还没有收藏网站，发给我就会自动整理到这里。</p>'
+
+    # Group by category, preserving first-seen order.
+    groups: dict[str, list[dict]] = {}
+    for s in sites:
+        groups.setdefault(s["category"], []).append(s)
+
+    blocks = []
+    for cat, items in groups.items():
+        thumbs, rows = [], []
+        for s in items:
+            name = html.escape(s["name"])
+            url = html.escape(s["url"])
+            desc = html.escape(s["desc"]) if s["desc"] else ""
+            host = html.escape(s["host"])
+            thumbs.append(
+                f"""<a class="site-card" href="{url}" target="_blank" rel="noopener">
+  <div class="thumb"><img loading="lazy" src="{html.escape(_mshot(s['url']))}" alt="{name}"></div>
+  <div class="site-info"><span class="site-name">{name}</span>
+    {f'<p class="site-desc">{desc}</p>' if desc else ''}
+    <span class="site-host">{host}</span>
+  </div>
+</a>"""
+            )
+            rows.append(
+                f"""<a class="site-row" href="{url}" target="_blank" rel="noopener">
+  <span class="site-name">{name}</span>
+  {f'<span class="site-desc">{desc}</span>' if desc else ''}
+  <span class="site-host">{host}</span>
+</a>"""
+            )
+        blocks.append(
+            f"""<div class="sites-cat-block">
+  <h3 class="sites-cat">{html.escape(cat)} <span class="count">{len(items)}</span></h3>
+  <div class="sites-grid">
+    {"".join(thumbs)}
+  </div>
+  <div class="sites-list">
+    {"".join(rows)}
+  </div>
+</div>"""
+        )
+
+    toolbar = """<div class="sites-toolbar">
+      <button class="view-btn active" data-view="grid">🖼 缩略图</button>
+      <button class="view-btn" data-view="list">☰ 列表</button>
+    </div>"""
+    script = """<script>
+      (function () {
+        var body = document.getElementById('sites-body');
+        var btns = document.querySelectorAll('.view-btn');
+        btns.forEach(function (b) {
+          b.addEventListener('click', function () {
+            btns.forEach(function (x) { x.classList.toggle('active', x === b); });
+            body.classList.remove('mode-grid', 'mode-list');
+            body.classList.add('mode-' + b.dataset.view);
+          });
+        });
+      })();
+    </script>"""
+    return (
+        toolbar
+        + '<div id="sites-body" class="mode-grid">'
+        + "\n".join(blocks)
+        + "</div>"
+        + script
+    )
+
+
 def render_html(
     cfg: dict,
     news: list[dict],
@@ -652,6 +764,7 @@ def render_html(
     papers: list[dict] | None = None,
     models: list[dict] | None = None,
     hn: list[dict] | None = None,
+    sites: list[dict] | None = None,
 ) -> str:
     papers = papers or []
     models = models or []
@@ -690,6 +803,11 @@ def render_html(
             "sub": f"{len(repos)} 个新兴项目 · 按星标排序",
             "cards": render_repo_cards(repos, show_original), "always": True,
         },
+        {
+            "id": "sites", "icon": "🎨", "label": "灵感站", "count": len(sites),
+            "sub": f"{len(sites)} 个收藏 · 缩略图 / 列表可切换",
+            "cards": render_sites_panel(sites), "raw": True,
+        },
     ]
     kept = [s for s in sections if s["count"] > 0 or s.get("always")]
 
@@ -700,12 +818,15 @@ def render_html(
             f'<button class="tab{active}" data-target="{s["id"]}" role="tab">'
             f'{s["icon"]} {s["label"]}<span class="tcount">{s["count"]}</span></button>'
         )
+        body = (
+            s["cards"]
+            if s.get("raw")
+            else f'<div class="grid">\n        {s["cards"]}\n      </div>'
+        )
         panels.append(
             f'''<section id="{s['id']}" class="panel{active}" role="tabpanel">
       <div class="sec-head"><h2>{s['icon']} {s['label']}</h2><span class="count">{s['sub']}</span></div>
-      <div class="grid">
-        {s['cards']}
-      </div>
+      {body}
     </section>'''
         )
 
@@ -809,6 +930,41 @@ HTML_SHELL = """<!doctype html>
   .topic { background: var(--accent-soft); color: var(--accent); font-size: .68rem;
     padding: 2px 7px; border-radius: 6px; }
   .empty { color: var(--muted); }
+  /* Curated sites: thumbnail / list toggle */
+  .sites-toolbar { display: flex; gap: 8px; margin-bottom: 16px; }
+  .view-btn { font: inherit; cursor: pointer; border: 1px solid var(--border);
+    background: var(--panel); color: var(--muted); padding: 6px 14px;
+    border-radius: 999px; font-size: .84rem; font-weight: 600; }
+  .view-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .sites-cat-block { margin-bottom: 26px; }
+  .sites-cat { font-size: 1rem; margin: 0 0 12px; display: flex; align-items: center;
+    gap: 8px; }
+  .sites-cat .count { color: var(--muted); font-size: .78rem; font-weight: 400; }
+  /* grid (thumbnail) view */
+  .sites-grid { display: grid; gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+  .site-card { display: block; background: var(--panel); border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden; text-decoration: none; color: inherit;
+    box-shadow: var(--shadow); transition: transform .12s ease, border-color .12s ease; }
+  .site-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .thumb { aspect-ratio: 16 / 10; background: var(--accent-soft); overflow: hidden; }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .site-info { padding: 11px 13px 13px; }
+  .site-name { font-weight: 700; font-size: .95rem; }
+  .site-desc { color: var(--muted); font-size: .82rem; margin: 5px 0 0; }
+  .site-host { color: var(--accent); font-size: .74rem; margin-top: 7px; display: block;
+    word-break: break-all; }
+  /* list view */
+  .sites-list { display: none; flex-direction: column; gap: 8px; }
+  .site-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+    padding: 11px 14px; text-decoration: none; color: inherit; box-shadow: var(--shadow); }
+  .site-row:hover { border-color: var(--accent); }
+  .site-row .site-name { flex: 0 0 auto; }
+  .site-row .site-desc { flex: 1 1 200px; margin: 0; }
+  .site-row .site-host { margin: 0; flex: 0 0 auto; }
+  #sites-body.mode-list .sites-grid { display: none; }
+  #sites-body.mode-list .sites-list { display: flex; }
   footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border);
     color: var(--muted); font-size: .78rem; text-align: center; }
   footer a { color: var(--accent); text-decoration: none; }
@@ -879,13 +1035,15 @@ def main() -> int:
     hn = collect_hackernews(cfg)
     log("== collecting github radar ==")
     repos = collect_repos(cfg)
+    log("== loading curated sites ==")
+    sites = collect_sites()
 
     log("== translating to Chinese ==")
     localize(cfg, news, repos, papers, hn)
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     (OUT_DIR / "index.html").write_text(
-        render_html(cfg, news, repos, papers, models, hn), encoding="utf-8"
+        render_html(cfg, news, repos, papers, models, hn, sites), encoding="utf-8"
     )
     (OUT_DIR / "data.json").write_text(
         json.dumps(
@@ -896,6 +1054,7 @@ def main() -> int:
                 "models": models,
                 "hacker_news": hn,
                 "repos": repos,
+                "sites": sites,
             },
             ensure_ascii=False,
             indent=2,

@@ -1,0 +1,29 @@
+# 设计灵感 / 前端资源收藏夹。
+#
+# 以后新增网站时，只要往 `sites` 里加一条（name / url / category / desc）即可。
+# 构建时会自动按 category 分组，并同时生成「缩略图」与「列表」两种视图。
+# 新出现的 category 会自动成为一个新分组，无需改代码。
+#
+# 缩略图由 WordPress mShots 免费截图服务实时生成（首次加载可能稍慢）。
+
+sites:
+  - name: "Aceternity UI"
+    url: "https://ui.aceternity.com"
+    category: "组件库"
+    desc: "精美的 Tailwind + 动效组件与模板，复制即用"
+  - name: "React Bits"
+    url: "https://reactbits.dev"
+    category: "组件库"
+    desc: "可直接复制的动效 React 组件"
+  - name: "Uiverse"
+    url: "https://uiverse.io"
+    category: "组件库"
+    desc: "最大的开源 UI 元素库（按钮 / 卡片 / loader）"
+  - name: "Motion"
+    url: "https://motion.dev"
+    category: "动效动画"
+    desc: "原 Framer Motion，JS / React 动画库，官网本身即范本"
+  - name: "Anime.js"
+    url: "https://animejs.com"
+    category: "动效动画"
+    desc: "轻量的 JavaScript 动画引擎"
