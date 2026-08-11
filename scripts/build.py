@@ -1260,16 +1260,24 @@ HTML_SHELL = """<!doctype html>
     font-size: .82rem; align-items: center; }
   .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--new);
     display: inline-block; margin-right: 6px; vertical-align: middle; }
-  /* Tab switcher */
-  .tabs { position: sticky; top: 0; z-index: 10; display: flex; gap: 8px;
-    background: var(--bg); padding: 12px 0 10px; margin-top: 14px;
+  /* Tab switcher — compact chips that wrap to multiple rows on small screens */
+  .tabs { position: sticky; top: 0; z-index: 10; display: flex; flex-wrap: wrap;
+    gap: 8px; background: var(--bg); padding: 12px 0 10px; margin-top: 14px;
     border-bottom: 1px solid var(--border); }
   .tab { font: inherit; cursor: pointer; border: 1px solid var(--border);
-    background: var(--panel); color: var(--muted); padding: 8px 16px;
-    border-radius: 999px; font-weight: 600; font-size: .92rem;
+    background: var(--panel); color: var(--muted); padding: 7px 13px;
+    border-radius: 999px; font-weight: 600; font-size: .9rem; line-height: 1;
+    white-space: nowrap; flex: 0 0 auto; display: inline-flex; align-items: center;
     transition: background .12s ease, color .12s ease, border-color .12s ease; }
+  .tab:hover { border-color: var(--accent); color: var(--text); }
   .tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-  .tab .tcount { opacity: .85; font-size: .76rem; margin-left: 4px; }
+  .tab .tcount { opacity: .7; font-size: .72rem; margin-left: 5px; font-weight: 500; }
+  .tab.active .tcount { opacity: .9; }
+  @media (max-width: 480px) {
+    .tabs { gap: 6px; padding: 10px 0 8px; }
+    .tab { padding: 6px 11px; font-size: .84rem; }
+    .tab .tcount { margin-left: 4px; }
+  }
   .panel { display: none; }
   .panel.active { display: block; animation: fade .18s ease; }
   @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; } }
