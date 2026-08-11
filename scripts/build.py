@@ -31,9 +31,11 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 CONFIG_PATH = ROOT / "config" / "sources.yaml"
 SITES_PATH = ROOT / "config" / "sites.yaml"
 OUT_DIR = ROOT / "public"
+STATE_PATH = ROOT / "data" / "state.json"
 
 USER_AGENT = "ai-top-news-bot/1.0 (+https://github.com/1skill/ai-top-news)"
 NOW = dt.datetime.now(dt.timezone.utc)
+TODAY = NOW.date().isoformat()
 
 GITHUB_API = "https://api.github.com/search/repositories"
 
@@ -48,6 +50,28 @@ def log(msg: str) -> None:
 def load_config() -> dict:
     with open(CONFIG_PATH, "r", encoding="utf-8") as fh:
         return yaml.safe_load(fh)
+
+
+def load_state() -> dict:
+    """Cross-run memory (kept in data/state.json). Used by the star-growth board
+    to remember each repo's earlier star count so we can rank by new stars."""
+    try:
+        with open(STATE_PATH, "r", encoding="utf-8") as fh:
+            data = json.load(fh)
+            return data if isinstance(data, dict) else {}
+    except (FileNotFoundError, ValueError):
+        return {}
+
+
+def save_state(state: dict) -> None:
+    """Persist state — only in CI (PERSIST_STATE set) so local runs stay clean."""
+    if not os.environ.get("PERSIST_STATE"):
+        log("[info] PERSIST_STATE unset -> not writing state.json (local run)")
+        return
+    STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with open(STATE_PATH, "w", encoding="utf-8") as fh:
+        json.dump(state, fh, ensure_ascii=False, indent=2, sort_keys=True)
+    log(f"[ok]   state saved -> {STATE_PATH}")
 
 
 def human_delta(when: dt.datetime | None) -> str:
@@ -157,16 +181,15 @@ def collect_news(cfg: dict) -> list[dict]:
 # --------------------------------------------------------------------------- #
 # GitHub AI radar
 # --------------------------------------------------------------------------- #
-def github_search(topic: str, since: str, token: str | None) -> list[dict]:
+def github_search(topic: str, pushed_since: str | None, token: str | None) -> list[dict]:
     headers = {"Accept": "application/vnd.github+json", "User-Agent": USER_AGENT}
     if token:
         headers["Authorization"] = f"Bearer {token}"
-    params = {
-        "q": f"topic:{topic} created:>={since}",
-        "sort": "stars",
-        "order": "desc",
-        "per_page": 25,
-    }
+    q = f"topic:{topic}"
+    if pushed_since:
+        # Keep the board fresh: only repos with recent activity.
+        q += f" pushed:>={pushed_since}"
+    params = {"q": q, "sort": "stars", "order": "desc", "per_page": 30}
     try:
         resp = requests.get(GITHUB_API, headers=headers, params=params, timeout=30)
         resp.raise_for_status()
@@ -178,44 +201,73 @@ def github_search(topic: str, since: str, token: str | None) -> list[dict]:
     return items
 
 
-def collect_repos(cfg: dict) -> list[dict]:
+def collect_repos(cfg: dict, state: dict) -> list[dict]:
+    """Star-growth leaderboard (涨星榜): rank AI repos by *new* stars gained
+    since the last snapshot, remembered across runs in data/state.json.
+
+    On the very first run (no baseline) a repo has no measurable growth yet, so
+    the board falls back to ranking those repos by absolute stars and labels
+    them "新收录"; real growth numbers appear from the next run on.
+    """
     gh = cfg.get("github", {})
     token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
-    window_days = int(gh.get("window_days", 45))
     new_within = int(gh.get("new_within_days", 10))
     min_stars = int(gh.get("min_stars", 40))
-    since = (NOW - dt.timedelta(days=window_days)).date().isoformat()
+    active_days = int(gh.get("active_days", 120))
+    window = max(1, int(gh.get("growth_window_days", 1)))
+    retention = int(gh.get("retention_days", 30))
+    pushed_since = (NOW - dt.timedelta(days=active_days)).date().isoformat()
 
     raw: list[dict] = []
     # Sequential to stay friendly with GitHub search rate limits.
     for topic in gh.get("topics", []):
-        raw.extend(github_search(topic, since, token))
+        raw.extend(github_search(topic, pushed_since, token))
+
+    snaps: dict = dict(state.get("repos", {}))  # full_name -> {stars, date}
 
     by_id: dict[int, dict] = {}
     for repo in raw:
         rid = repo.get("id")
         if rid is None or rid in by_id:
             continue
-        stars = repo.get("stargazers_count", 0)
+        stars = int(repo.get("stargazers_count", 0) or 0)
         if stars < min_stars:
             continue
+        name = repo.get("full_name", "")
         created = repo.get("created_at")
         created_dt = None
         if created:
             try:
-                created_dt = dt.datetime.fromisoformat(
-                    created.replace("Z", "+00:00")
-                )
+                created_dt = dt.datetime.fromisoformat(created.replace("Z", "+00:00"))
             except ValueError:
                 created_dt = None
-        is_new = bool(
-            created_dt and (NOW - created_dt).days <= new_within
-        )
+        is_new = bool(created_dt and (NOW - created_dt).days <= new_within)
+
+        # Star growth vs the remembered baseline snapshot.
+        base = snaps.get(name)
+        star_delta = None
+        delta_days = 0
+        if isinstance(base, dict) and "stars" in base:
+            star_delta = stars - int(base.get("stars", stars))
+            base_date = base.get("date", TODAY)
+            try:
+                delta_days = (NOW.date() - dt.date.fromisoformat(base_date)).days
+            except ValueError:
+                delta_days = 0
+            # Refresh the baseline once the window has elapsed so each window
+            # measures a fresh gain; within the window keep accumulating.
+            if delta_days >= window:
+                snaps[name] = {"stars": stars, "date": TODAY}
+        else:
+            snaps[name] = {"stars": stars, "date": TODAY}
+
         by_id[rid] = {
-            "name": repo.get("full_name", ""),
+            "name": name,
             "url": repo.get("html_url", ""),
             "description": (repo.get("description") or "").strip(),
             "stars": stars,
+            "star_delta": star_delta,
+            "delta_days": delta_days,
             "language": repo.get("language") or "",
             "topics": (repo.get("topics") or [])[:5],
             "created_iso": created_dt.isoformat() if created_dt else None,
@@ -223,8 +275,29 @@ def collect_repos(cfg: dict) -> list[dict]:
             "is_new": is_new,
         }
 
-    repos = sorted(by_id.values(), key=lambda r: r["stars"], reverse=True)
+    # Rank: measured growth first (by new stars desc), then first-sighting repos
+    # by absolute stars. Sort key puts unknown-growth last.
+    def sort_key(r: dict) -> tuple:
+        known = r["star_delta"] is not None
+        return (
+            1 if known else 0,
+            r["star_delta"] if known else 0,
+            r["stars"],
+        )
+
+    repos = sorted(by_id.values(), key=sort_key, reverse=True)
+
+    # Persist snapshots, pruning repos we haven't seen for a while.
+    cutoff = (NOW - dt.timedelta(days=retention)).date().isoformat()
+    state["repos"] = {
+        n: s
+        for n, s in snaps.items()
+        if isinstance(s, dict) and s.get("date", TODAY) >= cutoff
+    }
+
     max_repos = int(cfg.get("site", {}).get("max_repos", 30))
+    measured = sum(1 for r in repos if r["star_delta"] is not None)
+    log(f"[ok]   star radar -> {len(repos)} repos ({measured} with growth data)")
     return repos[:max_repos]
 
 
@@ -596,15 +669,31 @@ def render_repo_cards(repos: list[dict], show_original: bool = True) -> str:
         orig = ""
         if show_original and r["description"] and r["description"] != desc_zh:
             orig = f'<p class="card-orig">{html.escape(r["description"])}</p>'
+
+        # Star-growth badge: the headline metric of the 涨星榜.
+        d = r.get("star_delta")
+        if d is None:
+            growth = '<span class="ago">新收录</span>'
+        elif d > 0:
+            win = "今日" if r.get("delta_days", 0) <= 0 else f'近{r["delta_days"]}天'
+            growth = (
+                f'<span class="growth">🔥 +{_star_label(d)} 星'
+                f'<span class="gwin"> · {win}</span></span>'
+            )
+        elif d == 0:
+            growth = '<span class="ago">持平</span>'
+        else:
+            growth = f'<span class="ago">▼ {_star_label(-d)}</span>'
+
         cards.append(
             f"""<a class="card repo-card" href="{html.escape(r['url'])}" target="_blank" rel="noopener">
   <div class="card-meta"><span class="repo-name">{html.escape(r['name'])}</span>{new_badge}</div>
   <p class="card-teaser">{desc}</p>
   {orig}
   <div class="repo-foot">
+    {growth}
     <span class="stars">★ {_star_label(r['stars'])}</span>
     {lang}
-    <span class="ago">建于 {html.escape(r['created_ago'])}</span>
   </div>
   <div class="topics">{topics}</div>
 </a>"""
@@ -827,8 +916,8 @@ def render_html(
             "cards": render_hn_cards(hn, show_original),
         },
         {
-            "id": "radar", "icon": "🛰️", "label": "项目雷达", "count": len(repos),
-            "sub": f"{len(repos)} 个新兴项目 · 按星标排序",
+            "id": "radar", "icon": "🚀", "label": "涨星榜", "count": len(repos),
+            "sub": f"{len(repos)} 个项目 · 按近期新增星标排序",
             "cards": render_repo_cards(repos, show_original), "always": True,
         },
         {
@@ -953,6 +1042,8 @@ HTML_SHELL = """<!doctype html>
   .repo-foot { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;
     font-size: .78rem; color: var(--muted); align-items: center; }
   .stars { color: var(--star); font-weight: 700; }
+  .growth { color: var(--new); font-weight: 700; }
+  .growth .gwin { color: var(--muted); font-weight: 400; font-size: .72rem; }
   .lang { color: var(--text); }
   .topics { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
   .topic { background: var(--accent-soft); color: var(--accent); font-size: .68rem;
@@ -1056,6 +1147,7 @@ HTML_SHELL = """<!doctype html>
 # --------------------------------------------------------------------------- #
 def main() -> int:
     cfg = load_config()
+    state = load_state()
     log("== collecting news ==")
     news = collect_news(cfg)
     log("== collecting arxiv papers ==")
@@ -1064,8 +1156,8 @@ def main() -> int:
     models = collect_models(cfg)
     log("== collecting hacker news ==")
     hn = collect_hackernews(cfg)
-    log("== collecting github radar ==")
-    repos = collect_repos(cfg)
+    log("== collecting github star radar ==")
+    repos = collect_repos(cfg, state)
     log("== loading curated sites ==")
     sites = collect_sites()
 
@@ -1094,6 +1186,9 @@ def main() -> int:
     )
     # A .nojekyll file keeps GitHub Pages from touching our output.
     (OUT_DIR / ".nojekyll").write_text("", encoding="utf-8")
+
+    # Persist the star snapshots so the next run can measure growth.
+    save_state(state)
 
     total = len(news) + len(papers) + len(models) + len(hn) + len(repos)
     log(

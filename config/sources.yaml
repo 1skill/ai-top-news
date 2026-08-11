@@ -75,10 +75,16 @@ hacker_news:
   min_points: 50   # 过滤掉热度过低的帖子
   max_items: 20
 
-# GitHub "AI 项目雷达" settings.
+# GitHub "涨星榜" settings — ranks AI repos by NEW stars gained over time.
+# Growth is measured against snapshots remembered in data/state.json, so real
+# numbers appear from the second build on (the first run seeds the baseline).
 github:
-  # Only surface repos created within this many days (a "radar" of new projects).
-  window_days: 45
+  # Only consider repos pushed within this many days (keeps the board active).
+  active_days: 120
+  # Window (days) over which "new stars" are measured before the baseline resets.
+  growth_window_days: 1
+  # Forget snapshots for repos not seen for this many days (bounds state size).
+  retention_days: 30
   # Repos created within this many days get a "🆕 NEW" badge.
   new_within_days: 10
   # Topics to search. Results across all topics are merged & de-duplicated.
