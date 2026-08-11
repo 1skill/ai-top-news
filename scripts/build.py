@@ -31,11 +31,28 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 CONFIG_PATH = ROOT / "config" / "sources.yaml"
 SITES_PATH = ROOT / "config" / "sites.yaml"
 OUT_DIR = ROOT / "public"
+STATE_PATH = ROOT / "data" / "state.json"
 
 USER_AGENT = "ai-top-news-bot/1.0 (+https://github.com/1skill/ai-top-news)"
 NOW = dt.datetime.now(dt.timezone.utc)
+TODAY = NOW.date().isoformat()
 
 GITHUB_API = "https://api.github.com/search/repositories"
+APPLE_RSS = "https://rss.applemarketingtools.com/api/v2/{cc}/apps/{feed}/{limit}/apps.json"
+ITUNES_LOOKUP = "https://itunes.apple.com/lookup"
+
+# Apple App Store category genre ids -> unified Chinese labels. Using the stable
+# numeric ids keeps categories consistent across US/CN storefronts, which return
+# category names in different languages.
+APP_GENRES = {
+    "6000": "商务", "6001": "天气", "6002": "工具", "6003": "旅游",
+    "6004": "体育", "6005": "社交", "6006": "参考", "6007": "效率",
+    "6008": "摄影与录像", "6009": "新闻", "6010": "导航", "6011": "音乐",
+    "6012": "生活", "6013": "健康健美", "6014": "游戏", "6015": "财务",
+    "6016": "娱乐", "6017": "教育", "6018": "图书", "6020": "医疗",
+    "6021": "报刊杂志", "6023": "美食佳饮", "6024": "购物", "6025": "贴纸",
+    "6026": "开发者工具", "6027": "图形与设计",
+}
 
 
 # --------------------------------------------------------------------------- #
@@ -48,6 +65,28 @@ def log(msg: str) -> None:
 def load_config() -> dict:
     with open(CONFIG_PATH, "r", encoding="utf-8") as fh:
         return yaml.safe_load(fh)
+
+
+def load_state() -> dict:
+    """Cross-run memory (kept in data/state.json). Used by the star-growth board
+    to remember each repo's earlier star count so we can rank by new stars."""
+    try:
+        with open(STATE_PATH, "r", encoding="utf-8") as fh:
+            data = json.load(fh)
+            return data if isinstance(data, dict) else {}
+    except (FileNotFoundError, ValueError):
+        return {}
+
+
+def save_state(state: dict) -> None:
+    """Persist state — only in CI (PERSIST_STATE set) so local runs stay clean."""
+    if not os.environ.get("PERSIST_STATE"):
+        log("[info] PERSIST_STATE unset -> not writing state.json (local run)")
+        return
+    STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with open(STATE_PATH, "w", encoding="utf-8") as fh:
+        json.dump(state, fh, ensure_ascii=False, indent=2, sort_keys=True)
+    log(f"[ok]   state saved -> {STATE_PATH}")
 
 
 def human_delta(when: dt.datetime | None) -> str:
@@ -157,16 +196,15 @@ def collect_news(cfg: dict) -> list[dict]:
 # --------------------------------------------------------------------------- #
 # GitHub AI radar
 # --------------------------------------------------------------------------- #
-def github_search(topic: str, since: str, token: str | None) -> list[dict]:
+def github_search(topic: str, pushed_since: str | None, token: str | None) -> list[dict]:
     headers = {"Accept": "application/vnd.github+json", "User-Agent": USER_AGENT}
     if token:
         headers["Authorization"] = f"Bearer {token}"
-    params = {
-        "q": f"topic:{topic} created:>={since}",
-        "sort": "stars",
-        "order": "desc",
-        "per_page": 25,
-    }
+    q = f"topic:{topic}"
+    if pushed_since:
+        # Keep the board fresh: only repos with recent activity.
+        q += f" pushed:>={pushed_since}"
+    params = {"q": q, "sort": "stars", "order": "desc", "per_page": 30}
     try:
         resp = requests.get(GITHUB_API, headers=headers, params=params, timeout=30)
         resp.raise_for_status()
@@ -178,44 +216,73 @@ def github_search(topic: str, since: str, token: str | None) -> list[dict]:
     return items
 
 
-def collect_repos(cfg: dict) -> list[dict]:
+def collect_repos(cfg: dict, state: dict) -> list[dict]:
+    """Star-growth leaderboard (涨星榜): rank AI repos by *new* stars gained
+    since the last snapshot, remembered across runs in data/state.json.
+
+    On the very first run (no baseline) a repo has no measurable growth yet, so
+    the board falls back to ranking those repos by absolute stars and labels
+    them "新收录"; real growth numbers appear from the next run on.
+    """
     gh = cfg.get("github", {})
     token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
-    window_days = int(gh.get("window_days", 45))
     new_within = int(gh.get("new_within_days", 10))
     min_stars = int(gh.get("min_stars", 40))
-    since = (NOW - dt.timedelta(days=window_days)).date().isoformat()
+    active_days = int(gh.get("active_days", 120))
+    window = max(1, int(gh.get("growth_window_days", 1)))
+    retention = int(gh.get("retention_days", 30))
+    pushed_since = (NOW - dt.timedelta(days=active_days)).date().isoformat()
 
     raw: list[dict] = []
     # Sequential to stay friendly with GitHub search rate limits.
     for topic in gh.get("topics", []):
-        raw.extend(github_search(topic, since, token))
+        raw.extend(github_search(topic, pushed_since, token))
+
+    snaps: dict = dict(state.get("repos", {}))  # full_name -> {stars, date}
 
     by_id: dict[int, dict] = {}
     for repo in raw:
         rid = repo.get("id")
         if rid is None or rid in by_id:
             continue
-        stars = repo.get("stargazers_count", 0)
+        stars = int(repo.get("stargazers_count", 0) or 0)
         if stars < min_stars:
             continue
+        name = repo.get("full_name", "")
         created = repo.get("created_at")
         created_dt = None
         if created:
             try:
-                created_dt = dt.datetime.fromisoformat(
-                    created.replace("Z", "+00:00")
-                )
+                created_dt = dt.datetime.fromisoformat(created.replace("Z", "+00:00"))
             except ValueError:
                 created_dt = None
-        is_new = bool(
-            created_dt and (NOW - created_dt).days <= new_within
-        )
+        is_new = bool(created_dt and (NOW - created_dt).days <= new_within)
+
+        # Star growth vs the remembered baseline snapshot.
+        base = snaps.get(name)
+        star_delta = None
+        delta_days = 0
+        if isinstance(base, dict) and "stars" in base:
+            star_delta = stars - int(base.get("stars", stars))
+            base_date = base.get("date", TODAY)
+            try:
+                delta_days = (NOW.date() - dt.date.fromisoformat(base_date)).days
+            except ValueError:
+                delta_days = 0
+            # Refresh the baseline once the window has elapsed so each window
+            # measures a fresh gain; within the window keep accumulating.
+            if delta_days >= window:
+                snaps[name] = {"stars": stars, "date": TODAY}
+        else:
+            snaps[name] = {"stars": stars, "date": TODAY}
+
         by_id[rid] = {
-            "name": repo.get("full_name", ""),
+            "name": name,
             "url": repo.get("html_url", ""),
             "description": (repo.get("description") or "").strip(),
             "stars": stars,
+            "star_delta": star_delta,
+            "delta_days": delta_days,
             "language": repo.get("language") or "",
             "topics": (repo.get("topics") or [])[:5],
             "created_iso": created_dt.isoformat() if created_dt else None,
@@ -223,8 +290,29 @@ def collect_repos(cfg: dict) -> list[dict]:
             "is_new": is_new,
         }
 
-    repos = sorted(by_id.values(), key=lambda r: r["stars"], reverse=True)
+    # Rank: measured growth first (by new stars desc), then first-sighting repos
+    # by absolute stars. Sort key puts unknown-growth last.
+    def sort_key(r: dict) -> tuple:
+        known = r["star_delta"] is not None
+        return (
+            1 if known else 0,
+            r["star_delta"] if known else 0,
+            r["stars"],
+        )
+
+    repos = sorted(by_id.values(), key=sort_key, reverse=True)
+
+    # Persist snapshots, pruning repos we haven't seen for a while.
+    cutoff = (NOW - dt.timedelta(days=retention)).date().isoformat()
+    state["repos"] = {
+        n: s
+        for n, s in snaps.items()
+        if isinstance(s, dict) and s.get("date", TODAY) >= cutoff
+    }
+
     max_repos = int(cfg.get("site", {}).get("max_repos", 30))
+    measured = sum(1 for r in repos if r["star_delta"] is not None)
+    log(f"[ok]   star radar -> {len(repos)} repos ({measured} with growth data)")
     return repos[:max_repos]
 
 
@@ -438,6 +526,151 @@ def collect_sites() -> list[dict]:
 
 
 # --------------------------------------------------------------------------- #
+# iOS App Store — newly-charting apps + authoritative recommendations
+# --------------------------------------------------------------------------- #
+def apple_chart(cc: str, feed: str, limit: int) -> list[dict]:
+    url = APPLE_RSS.format(cc=cc, feed=feed, limit=limit)
+    try:
+        resp = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=25)
+        resp.raise_for_status()
+        results = resp.json().get("feed", {}).get("results", [])
+    except Exception as exc:  # noqa: BLE001 - one bad chart must not fail the build
+        log(f"[warn] app store chart failed: {cc}/{feed}: {exc}")
+        return []
+    log(f"[ok]   app store: {cc}/{feed} -> {len(results)} apps")
+    return results
+
+
+def enrich_app(app: dict) -> dict:
+    """Best-effort rating / price / description via the public iTunes lookup API."""
+    try:
+        resp = requests.get(
+            ITUNES_LOOKUP,
+            params={"id": app["id"], "country": app["country"]},
+            headers={"User-Agent": USER_AGENT},
+            timeout=20,
+        )
+        resp.raise_for_status()
+        results = resp.json().get("results", [])
+    except Exception as exc:  # noqa: BLE001
+        log(f"[warn] itunes lookup failed: {app['id']}: {exc}")
+        return app
+    if not results:
+        return app
+    r = results[0]
+    rating = r.get("averageUserRating")
+    app["rating"] = round(float(rating), 1) if rating else 0.0
+    app["rating_count"] = int(r.get("userRatingCount") or 0)
+    app["price"] = (r.get("formattedPrice") or "").strip()
+    app["desc"] = " ".join((r.get("description") or "").split())[:160]
+    if r.get("sellerName"):
+        app["artist"] = r["sellerName"]
+    if r.get("artworkUrl512"):
+        app["icon"] = r["artworkUrl512"]
+    return app
+
+
+def collect_apps(cfg: dict, state: dict) -> list[dict]:
+    """App Store 新品雷达: apps newly entering the charts, de-duplicated across
+    runs via data/state.json so a given app is only surfaced the first time."""
+    ac = cfg.get("app_store", {}) or {}
+    if not ac.get("enabled", True):
+        return []
+    countries = ac.get("countries", ["us"])
+    feeds = ac.get("feeds", ["top-free"])
+    limit = int(ac.get("limit", 50))
+    show_days = max(1, int(ac.get("show_days", 1)))
+    max_show = int(ac.get("max_show", 24))
+    enrich = bool(ac.get("enrich", True))
+    retention = int(ac.get("retention_days", 120))
+
+    current: dict[str, dict] = {}
+    for cc in countries:
+        for feed in feeds:
+            for rank, app in enumerate(apple_chart(cc, feed, limit), start=1):
+                aid = str(app.get("id") or "")
+                if not aid:
+                    continue
+                primary = (app.get("genres") or [{}])[0]
+                gid = str(primary.get("genreId") or "")
+                genre = APP_GENRES.get(gid, (primary.get("name") or "").strip())
+                cand = {
+                    "id": aid,
+                    "name": (app.get("name") or "").strip(),
+                    "artist": (app.get("artistName") or "").strip(),
+                    "url": (app.get("url") or "").strip(),
+                    "icon": (app.get("artworkUrl100") or "").strip(),
+                    "genre": genre,
+                    "chart": f"{cc.upper()} · {feed}",
+                    "rank": rank,
+                    "country": cc,
+                }
+                prev = current.get(aid)
+                if prev is None or rank < prev["rank"]:
+                    current[aid] = cand
+
+    seen: dict = dict(state.get("apps", {}))
+    cutoff = (NOW - dt.timedelta(days=show_days - 1)).date().isoformat()
+    fresh: list[dict] = []
+    for aid, meta in current.items():
+        first_seen = seen.get(aid)
+        if first_seen is None:
+            first_seen = TODAY
+            seen[aid] = first_seen  # remember so we never re-push it
+        if first_seen >= cutoff:
+            meta["first_seen"] = first_seen
+            fresh.append(meta)
+
+    fresh.sort(key=lambda m: (m["first_seen"], -m["rank"]), reverse=True)
+    shown = fresh[:max_show]
+    if enrich and shown:
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            shown = list(pool.map(enrich_app, shown))
+
+    keep = (NOW - dt.timedelta(days=retention)).date().isoformat()
+    state["apps"] = {k: v for k, v in seen.items() if isinstance(v, str) and v >= keep}
+    log(f"[ok]   app radar -> {len(shown)} new apps (of {len(current)} charting)")
+    return shown
+
+
+def collect_app_recs(cfg: dict, state: dict) -> list[dict]:
+    """App 推荐精选: daily digest from authoritative recommendation sites (RSS),
+    de-duplicated across runs so a link is only shown once."""
+    ar = cfg.get("app_recs", {}) or {}
+    if not ar.get("enabled", True):
+        return []
+    feeds = ar.get("feeds", [])
+    max_show = int(ar.get("max_show", 20))
+    retention = int(ar.get("retention_days", 60))
+
+    results: list[dict] = []
+    if feeds:
+        with ThreadPoolExecutor(max_workers=6) as pool:
+            for items in pool.map(fetch_feed, feeds):
+                results.extend(items)
+    results.sort(key=lambda x: x["published_ts"], reverse=True)
+
+    seen: dict = dict(state.get("recs", {}))
+    fresh: list[dict] = []
+    picked: set[str] = set()
+    for item in results:
+        link = item.get("link", "")
+        if not link or link in seen or link in picked:
+            continue
+        picked.add(link)
+        fresh.append(item)
+        if len(fresh) >= max_show:
+            break
+    for item in fresh:
+        seen[item["link"]] = TODAY
+
+    keep = (NOW - dt.timedelta(days=retention)).date().isoformat()
+    state["recs"] = {k: v for k, v in seen.items() if isinstance(v, str) and v >= keep}
+    log(f"[ok]   app recs -> {len(fresh)} fresh items")
+    return fresh
+
+
+# --------------------------------------------------------------------------- #
 # Translation (make headlines & descriptions Chinese)
 # --------------------------------------------------------------------------- #
 TRANSLATE_ENDPOINT = "https://translate.googleapis.com/translate_a/single"
@@ -489,6 +722,8 @@ def localize(
     repos: list[dict],
     papers: list[dict] | None = None,
     hn: list[dict] | None = None,
+    app_recs: list[dict] | None = None,
+    apps: list[dict] | None = None,
 ) -> None:
     """Translate English titles/teasers/descriptions to Chinese, in place.
 
@@ -497,20 +732,25 @@ def localize(
     """
     papers = papers or []
     hn = hn or []
+    app_recs = app_recs or []
+    apps = apps or []
     tcfg = cfg.get("translate", {}) or {}
     if not tcfg.get("enabled", True):
         for n in news:
             n["title_zh"], n["teaser_zh"] = n["title"], n["teaser"]
         _fill_original(papers)
+        _fill_original(app_recs)
         for h in hn:
             h["title_zh"] = h["title"]
         for r in repos:
             r["description_zh"] = r["description"]
+        for a in apps:
+            a["desc_zh"] = a.get("desc", "")
         return
 
     target = tcfg.get("target", "zh-CN")
     texts: set[str] = set()
-    for group in (news, papers):
+    for group in (news, papers, app_recs):
         for it in group:
             texts.add(it["title"])
             if it.get("teaser"):
@@ -520,6 +760,9 @@ def localize(
     for r in repos:
         if r["description"]:
             texts.add(r["description"])
+    for a in apps:
+        if a.get("desc"):
+            texts.add(a["desc"])
 
     mapping: dict[str, str] = {}
     with ThreadPoolExecutor(max_workers=6) as pool:
@@ -527,12 +770,14 @@ def localize(
         for fut in as_completed(futures):
             mapping[futures[fut]] = fut.result()
 
-    for group in (news, papers):
+    for group in (news, papers, app_recs):
         for it in group:
             it["title_zh"] = mapping.get(it["title"], it["title"])
             it["teaser_zh"] = (
                 mapping.get(it["teaser"], it["teaser"]) if it.get("teaser") else ""
             )
+    for a in apps:
+        a["desc_zh"] = mapping.get(a["desc"], a["desc"]) if a.get("desc") else ""
     for h in hn:
         h["title_zh"] = mapping.get(h["title"], h["title"])
     for r in repos:
@@ -596,17 +841,106 @@ def render_repo_cards(repos: list[dict], show_original: bool = True) -> str:
         orig = ""
         if show_original and r["description"] and r["description"] != desc_zh:
             orig = f'<p class="card-orig">{html.escape(r["description"])}</p>'
+
+        # Star-growth badge: the headline metric of the 涨星榜.
+        d = r.get("star_delta")
+        if d is None:
+            growth = '<span class="ago">新收录</span>'
+        elif d > 0:
+            win = "今日" if r.get("delta_days", 0) <= 0 else f'近{r["delta_days"]}天'
+            growth = (
+                f'<span class="growth">🔥 +{_star_label(d)} 星'
+                f'<span class="gwin"> · {win}</span></span>'
+            )
+        elif d == 0:
+            growth = '<span class="ago">持平</span>'
+        else:
+            growth = f'<span class="ago">▼ {_star_label(-d)}</span>'
+
         cards.append(
             f"""<a class="card repo-card" href="{html.escape(r['url'])}" target="_blank" rel="noopener">
   <div class="card-meta"><span class="repo-name">{html.escape(r['name'])}</span>{new_badge}</div>
   <p class="card-teaser">{desc}</p>
   {orig}
   <div class="repo-foot">
+    {growth}
     <span class="stars">★ {_star_label(r['stars'])}</span>
     {lang}
-    <span class="ago">建于 {html.escape(r['created_ago'])}</span>
   </div>
   <div class="topics">{topics}</div>
+</a>"""
+        )
+    return "\n".join(cards)
+
+
+def render_app_filters(apps: list[dict]) -> str:
+    """Category filter chips for the App radar (most common category first)."""
+    counts: dict[str, int] = {}
+    for a in apps:
+        g = a.get("genre") or ""
+        if g:
+            counts[g] = counts.get(g, 0) + 1
+    if len(counts) < 2:
+        return ""
+    genres = sorted(counts, key=lambda g: (-counts[g], g))
+    btns = ['<button class="app-filter active" data-filter="__all__">全部</button>']
+    for g in genres:
+        btns.append(
+            f'<button class="app-filter" data-filter="{html.escape(g)}">'
+            f'{html.escape(g)} <span class="fcount">{counts[g]}</span></button>'
+        )
+    return '<div class="app-filters">' + "".join(btns) + "</div>"
+
+
+def render_app_cards(apps: list[dict]) -> str:
+    if not apps:
+        return '<p class="empty">今天没有新进榜的 App，稍后自动重试。</p>'
+    cards = []
+    for a in apps:
+        genre = (
+            f'<span class="lang">{html.escape(a["genre"])}</span>'
+            if a.get("genre")
+            else ""
+        )
+        rating = ""
+        if a.get("rating"):
+            rc = a.get("rating_count") or 0
+            rc_label = f"{rc / 1000:.1f}k".replace(".0k", "k") if rc >= 1000 else str(rc)
+            rating = (
+                f'<span class="stars">★ {a["rating"]}</span>'
+                f'<span class="ago">{rc_label} 评分</span>'
+            )
+        price = (
+            f'<span class="price">{html.escape(a["price"])}</span>'
+            if a.get("price")
+            else ""
+        )
+        desc_txt = a.get("desc_zh") or a.get("desc") or ""
+        desc = (
+            f'<p class="card-teaser">{html.escape(desc_txt)}</p>' if desc_txt else ""
+        )
+        icon = (
+            f'<img class="app-icon" src="{html.escape(a["icon"])}" alt="" '
+            'loading="lazy" referrerpolicy="no-referrer">'
+            if a.get("icon")
+            else '<div class="app-icon"></div>'
+        )
+        cards.append(
+            f"""<a class="card app-card" data-genre="{html.escape(a.get('genre') or '')}" href="{html.escape(a['url'])}" target="_blank" rel="noopener">
+  <div class="app-top">
+    {icon}
+    <div class="app-head">
+      <h3 class="card-title">{html.escape(a['name'])}</h3>
+      <p class="app-artist">{html.escape(a['artist'])}</p>
+    </div>
+  </div>
+  <div class="repo-foot">
+    <span class="badge">🆕 {html.escape(a['chart'])}</span>
+    {genre}
+    {rating}
+    {price}
+  </div>
+  {desc}
 </a>"""
         )
     return "\n".join(cards)
@@ -793,10 +1127,14 @@ def render_html(
     models: list[dict] | None = None,
     hn: list[dict] | None = None,
     sites: list[dict] | None = None,
+    apps: list[dict] | None = None,
+    app_recs: list[dict] | None = None,
 ) -> str:
     papers = papers or []
     models = models or []
     hn = hn or []
+    apps = apps or []
+    app_recs = app_recs or []
     site = cfg.get("site", {})
     title = site.get("title", "AI Top News")
     subtitle = site.get("subtitle", "")
@@ -827,8 +1165,22 @@ def render_html(
             "cards": render_hn_cards(hn, show_original),
         },
         {
-            "id": "radar", "icon": "🛰️", "label": "项目雷达", "count": len(repos),
-            "sub": f"{len(repos)} 个新兴项目 · 按星标排序",
+            "id": "apps", "icon": "📱", "label": "App 新品", "count": len(apps),
+            "sub": f"{len(apps)} 个新进榜 App · 每个只推一次 · 可按分类筛选",
+            "cards": (
+                render_app_filters(apps)
+                + f'<div class="grid">\n        {render_app_cards(apps)}\n      </div>'
+            ),
+            "raw": True,
+        },
+        {
+            "id": "app-recs", "icon": "🌟", "label": "App 推荐", "count": len(app_recs),
+            "sub": f"{len(app_recs)} 条 · 权威站每日汇总",
+            "cards": render_news_cards(app_recs, show_original),
+        },
+        {
+            "id": "radar", "icon": "🚀", "label": "涨星榜", "count": len(repos),
+            "sub": f"{len(repos)} 个项目 · 按近期新增星标排序",
             "cards": render_repo_cards(repos, show_original), "always": True,
         },
         {
@@ -953,7 +1305,25 @@ HTML_SHELL = """<!doctype html>
   .repo-foot { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;
     font-size: .78rem; color: var(--muted); align-items: center; }
   .stars { color: var(--star); font-weight: 700; }
+  .growth { color: var(--new); font-weight: 700; }
+  .growth .gwin { color: var(--muted); font-weight: 400; font-size: .72rem; }
   .lang { color: var(--text); }
+  .price { color: var(--new); font-weight: 600; }
+  .app-top { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; }
+  .app-icon { width: 56px; height: 56px; border-radius: 14px; flex: none;
+    object-fit: cover; background: var(--accent-soft); border: 1px solid var(--border); }
+  .app-head { min-width: 0; }
+  .app-artist { color: var(--muted); font-size: .8rem; margin: 3px 0 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .app-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; }
+  .app-filter { font: inherit; font-size: .8rem; cursor: pointer;
+    background: var(--panel); color: var(--muted); border: 1px solid var(--border);
+    border-radius: 999px; padding: 5px 12px; transition: border-color .12s ease,
+      color .12s ease, background .12s ease; }
+  .app-filter:hover { border-color: var(--accent); color: var(--text); }
+  .app-filter.active { background: var(--accent-soft); color: var(--accent);
+    border-color: var(--accent); font-weight: 600; }
+  .app-filter .fcount { opacity: .6; font-size: .72rem; }
   .topics { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
   .topic { background: var(--accent-soft); color: var(--accent); font-size: .68rem;
     padding: 2px 7px; border-radius: 6px; }
@@ -1038,6 +1408,23 @@ HTML_SHELL = """<!doctype html>
         // Honor a #section hash on load so links can deep-link a tab.
         var hash = (location.hash || '').replace('#', '');
         if (hash) activate(hash);
+
+        // Category filter for the App 新品 panel (client-side show/hide).
+        var appSec = document.getElementById('apps');
+        if (appSec) {
+          appSec.addEventListener('click', function (e) {
+            var btn = e.target.closest('.app-filter');
+            if (!btn) return;
+            var f = btn.getAttribute('data-filter');
+            appSec.querySelectorAll('.app-filter').forEach(function (b) {
+              b.classList.toggle('active', b === btn);
+            });
+            appSec.querySelectorAll('.app-card').forEach(function (c) {
+              var show = f === '__all__' || c.getAttribute('data-genre') === f;
+              c.style.display = show ? '' : 'none';
+            });
+          });
+        }
       })();
     </script>
 
@@ -1056,6 +1443,7 @@ HTML_SHELL = """<!doctype html>
 # --------------------------------------------------------------------------- #
 def main() -> int:
     cfg = load_config()
+    state = load_state()
     log("== collecting news ==")
     news = collect_news(cfg)
     log("== collecting arxiv papers ==")
@@ -1064,17 +1452,22 @@ def main() -> int:
     models = collect_models(cfg)
     log("== collecting hacker news ==")
     hn = collect_hackernews(cfg)
-    log("== collecting github radar ==")
-    repos = collect_repos(cfg)
+    log("== collecting github star radar ==")
+    repos = collect_repos(cfg, state)
+    log("== collecting app store radar ==")
+    apps = collect_apps(cfg, state)
+    log("== collecting app recommendations ==")
+    app_recs = collect_app_recs(cfg, state)
     log("== loading curated sites ==")
     sites = collect_sites()
 
     log("== translating to Chinese ==")
-    localize(cfg, news, repos, papers, hn)
+    localize(cfg, news, repos, papers, hn, app_recs, apps)
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     (OUT_DIR / "index.html").write_text(
-        render_html(cfg, news, repos, papers, models, hn, sites), encoding="utf-8"
+        render_html(cfg, news, repos, papers, models, hn, sites, apps, app_recs),
+        encoding="utf-8",
     )
     (OUT_DIR / "data.json").write_text(
         json.dumps(
@@ -1085,6 +1478,8 @@ def main() -> int:
                 "models": models,
                 "hacker_news": hn,
                 "repos": repos,
+                "apps": apps,
+                "app_recs": app_recs,
                 "sites": sites,
             },
             ensure_ascii=False,
@@ -1095,10 +1490,17 @@ def main() -> int:
     # A .nojekyll file keeps GitHub Pages from touching our output.
     (OUT_DIR / ".nojekyll").write_text("", encoding="utf-8")
 
-    total = len(news) + len(papers) + len(models) + len(hn) + len(repos)
+    # Persist the star snapshots + app de-dup memory for the next run.
+    save_state(state)
+
+    total = (
+        len(news) + len(papers) + len(models) + len(hn) + len(repos)
+        + len(apps) + len(app_recs)
+    )
     log(
         f"== done: {len(news)} news, {len(papers)} papers, {len(models)} models, "
-        f"{len(hn)} hn, {len(repos)} repos -> {OUT_DIR} =="
+        f"{len(hn)} hn, {len(repos)} repos, {len(apps)} apps, "
+        f"{len(app_recs)} app-recs -> {OUT_DIR} =="
     )
     if total == 0:
         log("[error] no data collected at all")

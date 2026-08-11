@@ -75,10 +75,56 @@ hacker_news:
   min_points: 50   # 过滤掉热度过低的帖子
   max_items: 20
 
-# GitHub "AI 项目雷达" settings.
+# iOS App Store "新品雷达" — apps newly entering the charts.
+# Newness is computed by diffing against data/state.json, so an app is only
+# shown the first time it appears; repeats are suppressed automatically.
+app_store:
+  enabled: true
+  # Storefront country codes to scan (us / cn…). The cn store returns 中文名.
+  countries: ["us", "cn"]
+  # Chart feeds to scan; every app across all feeds/countries is de-duplicated.
+  feeds: ["top-free", "top-paid", "top-grossing"]
+  # How many entries to pull per feed.
+  limit: 50
+  # Show apps first seen within this many days (1 = only today's new arrivals).
+  show_days: 1
+  # Max apps shown on the page.
+  max_show: 24
+  # Enrich shown apps (rating / price / desc / hi-res icon) via iTunes lookup.
+  enrich: true
+  # Forget apps not seen for this many days (bounds state size).
+  retention_days: 120
+
+# Authoritative app-recommendation sites for the "App 推荐精选" section (RSS).
+# Items already shown on a previous day are suppressed via data/state.json.
+app_recs:
+  enabled: true
+  feeds:
+    - name: "少数派 sspai"
+      url: "https://sspai.com/feed"
+      limit: 10
+    - name: "Product Hunt"
+      url: "https://www.producthunt.com/feed"
+      limit: 10
+    - name: "MacStories"
+      url: "https://www.macstories.net/feed/"
+      limit: 6
+    - name: "AppAdvice"
+      url: "https://appadvice.com/feed"
+      limit: 6
+  max_show: 20
+  retention_days: 60
+
+# GitHub "涨星榜" settings — ranks AI repos by NEW stars gained over time.
+# Growth is measured against snapshots remembered in data/state.json, so real
+# numbers appear from the second build on (the first run seeds the baseline).
 github:
-  # Only surface repos created within this many days (a "radar" of new projects).
-  window_days: 45
+  # Only consider repos pushed within this many days (keeps the board active).
+  active_days: 120
+  # Window (days) over which "new stars" are measured before the baseline resets.
+  growth_window_days: 1
+  # Forget snapshots for repos not seen for this many days (bounds state size).
+  retention_days: 30
   # Repos created within this many days get a "🆕 NEW" badge.
   new_within_days: 10
   # Topics to search. Results across all topics are merged & de-duplicated.
