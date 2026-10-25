@@ -321,6 +321,7 @@
     "6462904878": "2026-10-15",
     "6463562198": "2026-09-08",
     "6466733523": "2026-08-11",
+    "6467168326": "2026-10-25",
     "6468941332": "2026-08-11",
     "6469514091": "2026-09-11",
     "6472232952": "2026-09-20",
@@ -662,6 +663,7 @@
     "https://sspai.com/post/114717": "2026-09-20",
     "https://sspai.com/post/114728": "2026-09-29",
     "https://sspai.com/post/114734": "2026-09-21",
+    "https://sspai.com/post/114741": "2026-10-25",
     "https://sspai.com/post/114788": "2026-09-21",
     "https://sspai.com/post/114815": "2026-09-21",
     "https://sspai.com/post/114821": "2026-10-12",
@@ -858,6 +860,7 @@
     "https://www.producthunt.com/products/agent-integrity-foundation-aif": "2026-09-10",
     "https://www.producthunt.com/products/agent-pets": "2026-10-22",
     "https://www.producthunt.com/products/agentdock": "2026-10-10",
+    "https://www.producthunt.com/products/agentgrid-io": "2026-10-25",
     "https://www.producthunt.com/products/agentsdr": "2026-10-09",
     "https://www.producthunt.com/products/agentvalley": "2026-10-24",
     "https://www.producthunt.com/products/aina": "2026-09-18",
@@ -974,6 +977,7 @@
     "https://www.producthunt.com/products/clink-custom-keyboards": "2026-09-29",
     "https://www.producthunt.com/products/clipnote-2": "2026-09-07",
     "https://www.producthunt.com/products/clippo-2": "2026-10-08",
+    "https://www.producthunt.com/products/clips-by-plastic": "2026-10-25",
     "https://www.producthunt.com/products/clipwise-notion-web-clipper": "2026-09-13",
     "https://www.producthunt.com/products/clockwork-5": "2026-09-04",
     "https://www.producthunt.com/products/cloudflare": "2026-10-23",
@@ -1178,6 +1182,7 @@
     "https://www.producthunt.com/products/hoistbay": "2026-10-21",
     "https://www.producthunt.com/products/hookest": "2026-09-25",
     "https://www.producthunt.com/products/hopscotch-7": "2026-09-29",
+    "https://www.producthunt.com/products/how-it-spread": "2026-10-25",
     "https://www.producthunt.com/products/how-it-went": "2026-10-24",
     "https://www.producthunt.com/products/howseen-ai": "2026-09-25",
     "https://www.producthunt.com/products/hugging-face": "2026-08-28",
@@ -1545,6 +1550,7 @@
     "https://www.producthunt.com/products/sourclip": "2026-09-01",
     "https://www.producthunt.com/products/spacebarx": "2026-08-27",
     "https://www.producthunt.com/products/speakeasydev": "2026-09-06",
+    "https://www.producthunt.com/products/specsight": "2026-10-25",
     "https://www.producthunt.com/products/speechka": "2026-09-23",
     "https://www.producthunt.com/products/speechshield": "2026-10-05",
     "https://www.producthunt.com/products/spinachi-ai": "2026-10-14",
@@ -1698,6 +1704,7 @@
     "https://www.producthunt.com/products/yggy": "2026-10-21",
     "https://www.producthunt.com/products/yomi-3": "2026-08-27",
     "https://www.producthunt.com/products/youkti": "2026-09-12",
+    "https://www.producthunt.com/products/yourcast": "2026-10-25",
     "https://www.producthunt.com/products/z-ai": "2026-10-15",
     "https://www.producthunt.com/products/zavi": "2026-10-07",
     "https://www.producthunt.com/products/zcad-ai": "2026-10-24",
@@ -1987,6 +1994,10 @@
     "Tencent-Hunyuan/HunyuanVideo": {
       "date": "2026-10-25",
       "stars": 12666
+    },
+    "Tencent-Hunyuan/Prism": {
+      "date": "2026-10-25",
+      "stars": 1123
     },
     "Tencent/WeKnora": {
       "date": "2026-10-25",
