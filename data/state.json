@@ -626,14 +626,10 @@
     "https://sspai.com/post/104231": "2026-10-17",
     "https://sspai.com/post/113295": "2026-09-16",
     "https://sspai.com/post/113605": "2026-09-11",
-    "https://sspai.com/post/113668": "2026-09-09",
     "https://sspai.com/post/113823": "2026-09-24",
-    "https://sspai.com/post/113842": "2026-09-09",
     "https://sspai.com/post/113843": "2026-10-08",
     "https://sspai.com/post/113880": "2026-09-13",
     "https://sspai.com/post/114211": "2026-09-23",
-    "https://sspai.com/post/114352": "2026-09-09",
-    "https://sspai.com/post/114366": "2026-09-09",
     "https://sspai.com/post/114384": "2026-09-10",
     "https://sspai.com/post/114392": "2026-09-10",
     "https://sspai.com/post/114393": "2026-09-10",
@@ -788,10 +784,12 @@
     "https://sspai.com/post/117867": "2026-10-30",
     "https://sspai.com/post/117953": "2026-10-31",
     "https://sspai.com/post/117960": "2026-10-31",
+    "https://sspai.com/post/118029": "2026-11-09",
     "https://sspai.com/post/118114": "2026-11-08",
     "https://sspai.com/post/118122": "2026-11-02",
     "https://sspai.com/post/118191": "2026-11-02",
     "https://sspai.com/post/118211": "2026-11-03",
+    "https://sspai.com/post/118227": "2026-11-09",
     "https://sspai.com/post/118232": "2026-11-03",
     "https://sspai.com/post/118240": "2026-11-02",
     "https://sspai.com/post/118250": "2026-11-06",
@@ -804,7 +802,9 @@
     "https://sspai.com/post/118546": "2026-11-05",
     "https://sspai.com/post/118570": "2026-11-06",
     "https://sspai.com/post/118587": "2026-11-06",
+    "https://sspai.com/post/118612": "2026-11-09",
     "https://sspai.com/post/118623": "2026-11-06",
+    "https://sspai.com/post/118805": "2026-11-09",
     "https://sspai.com/post/47126": "2026-09-15",
     "https://sspai.com/post/92653": "2026-10-14",
     "https://sspai.com/prime/story/30-easy-steamed-dishes": "2026-11-05",
@@ -905,11 +905,9 @@
     "https://www.producthunt.com/products/2ba-ai": "2026-09-22",
     "https://www.producthunt.com/products/2g": "2026-10-26",
     "https://www.producthunt.com/products/3am-super-intelligence": "2026-10-18",
-    "https://www.producthunt.com/products/49agents-ide": "2026-09-09",
     "https://www.producthunt.com/products/accordio": "2026-09-11",
     "https://www.producthunt.com/products/actually-asked": "2026-10-16",
     "https://www.producthunt.com/products/adant-ai": "2026-10-15",
-    "https://www.producthunt.com/products/adscope-2": "2026-09-09",
     "https://www.producthunt.com/products/afterlid": "2026-10-29",
     "https://www.producthunt.com/products/afterparty": "2026-10-16",
     "https://www.producthunt.com/products/agent-activity": "2026-10-03",
@@ -919,6 +917,7 @@
     "https://www.producthunt.com/products/agent-inbox": "2026-11-02",
     "https://www.producthunt.com/products/agent-integrity-foundation-aif": "2026-09-10",
     "https://www.producthunt.com/products/agent-pets": "2026-10-22",
+    "https://www.producthunt.com/products/agent-powered-geo-by-dageno": "2026-11-09",
     "https://www.producthunt.com/products/agentdock": "2026-10-10",
     "https://www.producthunt.com/products/agentgrid-io": "2026-10-25",
     "https://www.producthunt.com/products/agentmash": "2026-11-01",
@@ -943,13 +942,13 @@
     "https://www.producthunt.com/products/appwrite": "2026-09-16",
     "https://www.producthunt.com/products/archie-3": "2026-11-08",
     "https://www.producthunt.com/products/archivist": "2026-10-22",
+    "https://www.producthunt.com/products/arcjet": "2026-11-09",
     "https://www.producthunt.com/products/arco-4": "2026-10-29",
     "https://www.producthunt.com/products/ari-helper": "2026-10-06",
     "https://www.producthunt.com/products/ariso": "2026-09-18",
     "https://www.producthunt.com/products/arsaze-ai-native-video-editor": "2026-09-29",
     "https://www.producthunt.com/products/aside-6": "2026-09-14",
     "https://www.producthunt.com/products/askdeck": "2026-09-17",
-    "https://www.producthunt.com/products/ass-auction": "2026-09-09",
     "https://www.producthunt.com/products/asymptotelabs": "2026-11-02",
     "https://www.producthunt.com/products/atelier-9": "2026-10-16",
     "https://www.producthunt.com/products/athenic-ai": "2026-09-10",
@@ -997,6 +996,7 @@
     "https://www.producthunt.com/products/caldera": "2026-10-17",
     "https://www.producthunt.com/products/calenteri": "2026-10-16",
     "https://www.producthunt.com/products/calerto-meeting-alarms": "2026-09-12",
+    "https://www.producthunt.com/products/calmly-script": "2026-11-09",
     "https://www.producthunt.com/products/calnio": "2026-10-04",
     "https://www.producthunt.com/products/campfire-12": "2026-09-30",
     "https://www.producthunt.com/products/canva": "2026-10-24",
@@ -1074,6 +1074,7 @@
     "https://www.producthunt.com/products/cube-forms": "2026-10-12",
     "https://www.producthunt.com/products/cubicle-2": "2026-10-03",
     "https://www.producthunt.com/products/cue-by-manus": "2026-10-02",
+    "https://www.producthunt.com/products/cue-voice-keyboard": "2026-11-09",
     "https://www.producthunt.com/products/cuey-2": "2026-09-27",
     "https://www.producthunt.com/products/cura-3": "2026-10-01",
     "https://www.producthunt.com/products/curiouslm": "2026-11-02",
@@ -1103,7 +1104,6 @@
     "https://www.producthunt.com/products/devterminal": "2026-10-11",
     "https://www.producthunt.com/products/diagramly-2": "2026-10-14",
     "https://www.producthunt.com/products/diff-tour": "2026-11-02",
-    "https://www.producthunt.com/products/diiverge-co": "2026-09-09",
     "https://www.producthunt.com/products/directus": "2026-10-01",
     "https://www.producthunt.com/products/display-dev": "2026-11-02",
     "https://www.producthunt.com/products/diurnal": "2026-09-22",
@@ -1165,6 +1165,7 @@
     "https://www.producthunt.com/products/flat-social": "2026-09-16",
     "https://www.producthunt.com/products/fleeep": "2026-11-07",
     "https://www.producthunt.com/products/flexchords": "2026-10-04",
+    "https://www.producthunt.com/products/flic-cue": "2026-11-09",
     "https://www.producthunt.com/products/flicka": "2026-09-21",
     "https://www.producthunt.com/products/flipcorder": "2026-10-26",
     "https://www.producthunt.com/products/flockbay": "2026-11-03",
@@ -1182,7 +1183,6 @@
     "https://www.producthunt.com/products/fraud-blocker": "2026-10-28",
     "https://www.producthunt.com/products/frctl": "2026-09-26",
     "https://www.producthunt.com/products/freescan-app": "2026-09-10",
-    "https://www.producthunt.com/products/frigade": "2026-09-09",
     "https://www.producthunt.com/products/fuseai": "2026-10-06",
     "https://www.producthunt.com/products/fwrd": "2026-10-15",
     "https://www.producthunt.com/products/galactic-receipt-scanner": "2026-09-18",
@@ -1197,6 +1197,7 @@
     "https://www.producthunt.com/products/ghostwriter-by-myhandler": "2026-09-13",
     "https://www.producthunt.com/products/gitbot-2": "2026-09-30",
     "https://www.producthunt.com/products/gitglow-2": "2026-10-10",
+    "https://www.producthunt.com/products/github": "2026-11-09",
     "https://www.producthunt.com/products/gladys-assistant": "2026-09-29",
     "https://www.producthunt.com/products/glasshand": "2026-11-05",
     "https://www.producthunt.com/products/gleap": "2026-10-19",
@@ -1235,6 +1236,7 @@
     "https://www.producthunt.com/products/hoistbay": "2026-10-21",
     "https://www.producthunt.com/products/hookest": "2026-09-25",
     "https://www.producthunt.com/products/hopscotch-7": "2026-09-29",
+    "https://www.producthunt.com/products/hounddog-ai-static-code-scanner-2": "2026-11-09",
     "https://www.producthunt.com/products/how-it-spread": "2026-10-25",
     "https://www.producthunt.com/products/how-it-went": "2026-10-24",
     "https://www.producthunt.com/products/howseen-ai": "2026-09-25",
@@ -1276,8 +1278,8 @@
     "https://www.producthunt.com/products/jimmy": "2026-10-29",
     "https://www.producthunt.com/products/jobmate-ai-3": "2026-10-26",
     "https://www.producthunt.com/products/jogak": "2026-10-04",
+    "https://www.producthunt.com/products/jotform": "2026-11-09",
     "https://www.producthunt.com/products/jottoo": "2026-09-16",
-    "https://www.producthunt.com/products/jupitrr": "2026-09-09",
     "https://www.producthunt.com/products/kabza": "2026-09-12",
     "https://www.producthunt.com/products/kaiku": "2026-09-25",
     "https://www.producthunt.com/products/kairn-2": "2026-09-25",
@@ -1334,7 +1336,6 @@
     "https://www.producthunt.com/products/lumiko": "2026-09-19",
     "https://www.producthunt.com/products/lune-research": "2026-10-10",
     "https://www.producthunt.com/products/lurk": "2026-09-30",
-    "https://www.producthunt.com/products/lyrimuse": "2026-09-09",
     "https://www.producthunt.com/products/m-kay": "2026-09-30",
     "https://www.producthunt.com/products/maaa": "2026-09-18",
     "https://www.producthunt.com/products/mac-duo": "2026-09-15",
@@ -1355,7 +1356,6 @@
     "https://www.producthunt.com/products/maritime": "2026-11-05",
     "https://www.producthunt.com/products/marked-share": "2026-09-12",
     "https://www.producthunt.com/products/marqly": "2026-09-14",
-    "https://www.producthunt.com/products/mastra": "2026-09-09",
     "https://www.producthunt.com/products/maximem-synap": "2026-09-24",
     "https://www.producthunt.com/products/mcpgawk": "2026-10-06",
     "https://www.producthunt.com/products/mcpjam-inspector": "2026-09-17",
@@ -1404,7 +1404,6 @@
     "https://www.producthunt.com/products/mypip-2": "2026-10-24",
     "https://www.producthunt.com/products/n8n-chat-ui-2": "2026-10-26",
     "https://www.producthunt.com/products/naise-ai": "2026-09-23",
-    "https://www.producthunt.com/products/nametag-ai": "2026-09-09",
     "https://www.producthunt.com/products/nana-2": "2026-11-03",
     "https://www.producthunt.com/products/nani-2": "2026-10-16",
     "https://www.producthunt.com/products/naoma": "2026-09-14",
@@ -1425,8 +1424,8 @@
     "https://www.producthunt.com/products/noan-2": "2026-09-24",
     "https://www.producthunt.com/products/nocto": "2026-10-30",
     "https://www.producthunt.com/products/nomac": "2026-11-08",
-    "https://www.producthunt.com/products/noodle-seed": "2026-09-09",
     "https://www.producthunt.com/products/norah-studio": "2026-10-30",
+    "https://www.producthunt.com/products/north-5": "2026-11-09",
     "https://www.producthunt.com/products/notch-11": "2026-11-08",
     "https://www.producthunt.com/products/notch-radio": "2026-10-06",
     "https://www.producthunt.com/products/notchisland-2": "2026-11-08",
@@ -1490,7 +1489,6 @@
     "https://www.producthunt.com/products/pacertrip": "2026-11-07",
     "https://www.producthunt.com/products/pactto-replay": "2026-09-23",
     "https://www.producthunt.com/products/paddock-2": "2026-10-27",
-    "https://www.producthunt.com/products/paillor": "2026-09-09",
     "https://www.producthunt.com/products/panza-2": "2026-10-21",
     "https://www.producthunt.com/products/paragraph-notes": "2026-09-26",
     "https://www.producthunt.com/products/parall": "2026-09-24",
@@ -1675,7 +1673,6 @@
     "https://www.producthunt.com/products/synter-canvas": "2026-11-03",
     "https://www.producthunt.com/products/szept": "2026-09-29",
     "https://www.producthunt.com/products/table-canon-ttrpg-campaign-memory": "2026-10-14",
-    "https://www.producthunt.com/products/tables-so": "2026-09-09",
     "https://www.producthunt.com/products/tabsh": "2026-10-26",
     "https://www.producthunt.com/products/taim-4": "2026-10-16",
     "https://www.producthunt.com/products/takweem-ai": "2026-10-07",
@@ -1719,7 +1716,6 @@
     "https://www.producthunt.com/products/tourkit": "2026-09-26",
     "https://www.producthunt.com/products/tower": "2026-10-18",
     "https://www.producthunt.com/products/train-with-pasta": "2026-10-17",
-    "https://www.producthunt.com/products/trancy-air": "2026-09-09",
     "https://www.producthunt.com/products/transcendence": "2026-09-19",
     "https://www.producthunt.com/products/translate-like-me": "2026-10-04",
     "https://www.producthunt.com/products/trellis-4": "2026-10-28",
@@ -1766,6 +1762,7 @@
     "https://www.producthunt.com/products/walkai-talkai": "2026-10-19",
     "https://www.producthunt.com/products/walrus-console": "2026-10-07",
     "https://www.producthunt.com/products/wanaka-studio": "2026-11-04",
+    "https://www.producthunt.com/products/watchflows": "2026-11-09",
     "https://www.producthunt.com/products/wattmate": "2026-10-03",
     "https://www.producthunt.com/products/wavefunction": "2026-11-03",
     "https://www.producthunt.com/products/wealthfolio": "2026-09-10",
@@ -1781,7 +1778,6 @@
     "https://www.producthunt.com/products/withhuman": "2026-10-15",
     "https://www.producthunt.com/products/wokyintosh": "2026-09-12",
     "https://www.producthunt.com/products/work-life-panda": "2026-09-12",
-    "https://www.producthunt.com/products/workid-ai": "2026-09-09",
     "https://www.producthunt.com/products/workshopy-io": "2026-09-15",
     "https://www.producthunt.com/products/world-signal": "2026-09-25",
     "https://www.producthunt.com/products/worldsplat": "2026-09-17",
@@ -1806,256 +1802,256 @@
   },
   "repos": {
     "1Panel-dev/1Panel": {
-      "date": "2026-11-08",
-      "stars": 37385
+      "date": "2026-11-09",
+      "stars": 37407
     },
     "AI-Efficiency/Awesome-Model-Quantization": {
-      "date": "2026-11-08",
-      "stars": 2464
+      "date": "2026-11-09",
+      "stars": 2465
     },
     "AI4Finance-Foundation/FinGPT": {
-      "date": "2026-11-08",
-      "stars": 21539
+      "date": "2026-11-09",
+      "stars": 21542
     },
     "AI4Finance-Foundation/FinRobot": {
       "date": "2026-10-21",
       "stars": 8257
     },
     "AccumulateMore/CV": {
-      "date": "2026-11-08",
-      "stars": 24243
+      "date": "2026-11-09",
+      "stars": 24257
     },
     "Anil-matcha/Open-Generative-AI": {
-      "date": "2026-11-08",
-      "stars": 33142
+      "date": "2026-11-09",
+      "stars": 33513
     },
     "Aratako/Irodori-TTS": {
-      "date": "2026-11-08",
-      "stars": 1562
+      "date": "2026-11-09",
+      "stars": 1575
     },
     "AstrBotDevs/AstrBot": {
-      "date": "2026-11-08",
-      "stars": 46406
+      "date": "2026-11-09",
+      "stars": 46489
     },
     "BradyFU/Awesome-Multimodal-Large-Language-Models": {
-      "date": "2026-11-08",
-      "stars": 18079
+      "date": "2026-11-09",
+      "stars": 18078
     },
     "Canner/WrenAI": {
       "date": "2026-10-21",
       "stars": 17924
     },
     "ChenHsing/Awesome-Video-Diffusion-Models": {
-      "date": "2026-11-08",
+      "date": "2026-11-09",
       "stars": 2329
     },
     "ChromeDevTools/chrome-devtools-mcp": {
-      "date": "2026-11-08",
-      "stars": 54946
+      "date": "2026-11-09",
+      "stars": 55004
     },
     "ComposioHQ/awesome-claude-skills": {
-      "date": "2026-11-08",
-      "stars": 79012
+      "date": "2026-11-09",
+      "stars": 79090
     },
     "CopilotKit/CopilotKit": {
-      "date": "2026-11-08",
-      "stars": 38564
+      "date": "2026-11-09",
+      "stars": 38575
     },
     "CryptoAILab/Awesome-LM-SSP": {
-      "date": "2026-11-08",
+      "date": "2026-11-09",
       "stars": 2102
     },
     "D4Vinci/Scrapling": {
-      "date": "2026-11-08",
-      "stars": 99468
+      "date": "2026-11-09",
+      "stars": 100142
     },
     "Developer-Y/cs-video-courses": {
-      "date": "2026-11-08",
-      "stars": 84667
+      "date": "2026-11-09",
+      "stars": 84740
     },
     "DietrichGebert/ponytail": {
-      "date": "2026-11-08",
-      "stars": 186528
+      "date": "2026-11-09",
+      "stars": 187149
     },
     "FareedKhan-dev/train-llm-from-scratch": {
-      "date": "2026-11-08",
-      "stars": 13163
+      "date": "2026-11-09",
+      "stars": 13172
     },
     "FlashML-org/FreeVideo": {
-      "date": "2026-11-08",
-      "stars": 2836
+      "date": "2026-11-09",
+      "stars": 2868
     },
     "FlowiseAI/Flowise": {
-      "date": "2026-11-08",
-      "stars": 55561
+      "date": "2026-11-09",
+      "stars": 55566
     },
     "GoogleCloudPlatform/generative-ai": {
-      "date": "2026-11-08",
-      "stars": 17851
+      "date": "2026-11-09",
+      "stars": 17856
     },
     "Graphify-Labs/graphify": {
-      "date": "2026-11-08",
-      "stars": 144126
+      "date": "2026-11-09",
+      "stars": 144669
     },
     "GreyDGL/PentestGPT": {
-      "date": "2026-11-08",
-      "stars": 16319
+      "date": "2026-11-09",
+      "stars": 16339
     },
     "HBAI-Ltd/Toonflow-app": {
-      "date": "2026-11-08",
-      "stars": 21049
+      "date": "2026-11-09",
+      "stars": 21169
     },
     "HKUDS/DeepTutor": {
-      "date": "2026-11-08",
-      "stars": 56527
+      "date": "2026-11-09",
+      "stars": 57286
     },
     "HKUDS/LightRAG": {
-      "date": "2026-11-08",
-      "stars": 40603
+      "date": "2026-11-09",
+      "stars": 40620
     },
     "HKUDS/nanobot": {
       "date": "2026-11-08",
       "stars": 49917
     },
     "HumanSignal/label-studio": {
-      "date": "2026-11-08",
-      "stars": 28648
+      "date": "2026-11-09",
+      "stars": 28661
     },
     "ItzCrazyKns/Vane": {
-      "date": "2026-11-08",
-      "stars": 38066
+      "date": "2026-11-09",
+      "stars": 38104
     },
     "JuliaLang/julia": {
-      "date": "2026-11-08",
+      "date": "2026-11-09",
       "stars": 49244
     },
     "JuliusBrussee/caveman": {
-      "date": "2026-11-08",
-      "stars": 118214
+      "date": "2026-11-09",
+      "stars": 118470
     },
     "KalyanKS-NLP/llm-engineer-toolkit": {
-      "date": "2026-11-08",
-      "stars": 11040
+      "date": "2026-11-09",
+      "stars": 11057
     },
     "Kong/kong": {
-      "date": "2026-11-08",
-      "stars": 44366
+      "date": "2026-11-09",
+      "stars": 44368
     },
     "Leonxlnx/taste-skill": {
-      "date": "2026-11-08",
-      "stars": 111770
+      "date": "2026-11-09",
+      "stars": 112208
     },
     "Lightning-AI/litgpt": {
-      "date": "2026-11-08",
+      "date": "2026-11-09",
       "stars": 13748
     },
     "Lightning-AI/pytorch-lightning": {
-      "date": "2026-11-08",
+      "date": "2026-11-09",
       "stars": 31447
     },
     "Lightricks/ComfyUI-LTXVideo": {
-      "date": "2026-11-08",
-      "stars": 4249
+      "date": "2026-11-09",
+      "stars": 4259
     },
     "Lightricks/LTX-Video": {
-      "date": "2026-11-08",
-      "stars": 11341
+      "date": "2026-11-09",
+      "stars": 11346
     },
     "MaaAssistantArknights/MaaAssistantArknights": {
-      "date": "2026-11-08",
-      "stars": 24416
+      "date": "2026-11-09",
+      "stars": 24447
     },
     "MaximeVandegar/Papers-in-100-Lines-of-Code": {
-      "date": "2026-11-08",
+      "date": "2026-11-09",
       "stars": 2912
     },
     "MemPalace/mempalace": {
-      "date": "2026-11-08",
-      "stars": 60465
+      "date": "2026-11-09",
+      "stars": 60479
     },
     "Mintplex-Labs/anything-llm": {
-      "date": "2026-11-08",
-      "stars": 68053
+      "date": "2026-11-09",
+      "stars": 68095
     },
     "ModelTC/LightX2V": {
-      "date": "2026-11-08",
-      "stars": 2995
+      "date": "2026-11-09",
+      "stars": 2996
     },
     "NVIDIA-NeMo/Speech": {
-      "date": "2026-11-08",
-      "stars": 18716
+      "date": "2026-11-09",
+      "stars": 18720
     },
     "NVIDIA/Megatron-LM": {
-      "date": "2026-11-08",
-      "stars": 18347
+      "date": "2026-11-09",
+      "stars": 18354
     },
     "NVlabs/FastGen": {
       "date": "2026-10-24",
       "stars": 1036
     },
     "NirDiamant/GenAI_Agents": {
-      "date": "2026-11-08",
-      "stars": 24866
+      "date": "2026-11-09",
+      "stars": 24886
     },
     "NirDiamant/RAG_Techniques": {
-      "date": "2026-11-08",
-      "stars": 30265
+      "date": "2026-11-09",
+      "stars": 30276
     },
     "NirDiamant/agents-towards-production": {
-      "date": "2026-11-08",
-      "stars": 21848
+      "date": "2026-11-09",
+      "stars": 21858
     },
     "NousResearch/hermes-agent": {
-      "date": "2026-11-08",
-      "stars": 261581
+      "date": "2026-11-09",
+      "stars": 261883
     },
     "OpenHands/OpenHands": {
-      "date": "2026-11-08",
-      "stars": 92920
+      "date": "2026-11-09",
+      "stars": 93008
     },
     "OpenImagingLab/FlashVSR": {
-      "date": "2026-11-08",
-      "stars": 1967
+      "date": "2026-11-09",
+      "stars": 1970
     },
     "OpenMOSS/MOSS": {
-      "date": "2026-11-08",
-      "stars": 12347
+      "date": "2026-11-09",
+      "stars": 12352
     },
     "OpenMOSS/MOVA": {
-      "date": "2026-11-08",
+      "date": "2026-11-09",
       "stars": 1140
     },
     "OpenMontageInc/OpenMontage": {
-      "date": "2026-11-08",
-      "stars": 78394
+      "date": "2026-11-09",
+      "stars": 78833
     },
     "OpenRLHF/OpenRLHF": {
-      "date": "2026-11-08",
-      "stars": 10144
+      "date": "2026-11-09",
+      "stars": 10146
     },
     "PKU-YuanGroup/Helios": {
-      "date": "2026-11-08",
-      "stars": 2256
+      "date": "2026-11-09",
+      "stars": 2257
     },
     "PRIV-Creation/Awesome-Controllable-T2I-Diffusion-Models": {
       "date": "2026-10-25",
       "stars": 1108
     },
     "PaddlePaddle/PaddleOCR": {
-      "date": "2026-11-08",
-      "stars": 92419
+      "date": "2026-11-09",
+      "stars": 92463
     },
     "Panniantong/Agent-Reach": {
-      "date": "2026-11-08",
-      "stars": 110089
+      "date": "2026-11-09",
+      "stars": 110427
     },
     "PrunaAI/pruna": {
-      "date": "2026-11-08",
-      "stars": 1365
+      "date": "2026-11-09",
+      "stars": 1378
     },
     "RunanywhereAI/runanywhere-sdks": {
-      "date": "2026-11-08",
-      "stars": 10337
+      "date": "2026-11-09",
+      "stars": 10339
     },
     "SYSTRAN/faster-whisper": {
       "date": "2026-10-24",
@@ -2066,227 +2062,227 @@
       "stars": 3797
     },
     "Shubhamsaboo/awesome-llm-apps": {
-      "date": "2026-11-08",
-      "stars": 144142
+      "date": "2026-11-09",
+      "stars": 144244
     },
     "Significant-Gravitas/AutoGPT": {
-      "date": "2026-11-08",
-      "stars": 187935
+      "date": "2026-11-09",
+      "stars": 187957
     },
     "Snailclimb/JavaGuide": {
-      "date": "2026-11-08",
-      "stars": 159466
+      "date": "2026-11-09",
+      "stars": 159476
     },
     "TauricResearch/TradingAgents": {
-      "date": "2026-11-08",
-      "stars": 121243
+      "date": "2026-11-09",
+      "stars": 121452
     },
     "Tencent-Hunyuan/HunyuanVideo": {
-      "date": "2026-11-08",
-      "stars": 12740
+      "date": "2026-11-09",
+      "stars": 12747
     },
     "Tencent-Hunyuan/Prism": {
-      "date": "2026-11-08",
-      "stars": 1513
+      "date": "2026-11-09",
+      "stars": 1514
     },
     "Tencent/WeKnora": {
-      "date": "2026-11-08",
-      "stars": 36779
+      "date": "2026-11-09",
+      "stars": 36940
     },
     "Tencent/ncnn": {
-      "date": "2026-11-08",
+      "date": "2026-11-09",
       "stars": 24029
     },
     "The-Art-of-Hacking/h4cker": {
-      "date": "2026-11-08",
-      "stars": 30096
+      "date": "2026-11-09",
+      "stars": 30113
     },
     "The-Pocket/PocketFlow": {
-      "date": "2026-11-08",
-      "stars": 11308
+      "date": "2026-11-09",
+      "stars": 11314
     },
     "The-Vibe-Company/quivr": {
-      "date": "2026-11-08",
-      "stars": 39636
+      "date": "2026-11-09",
+      "stars": 39638
     },
     "TingsongYu/PyTorch-Tutorial-2nd": {
-      "date": "2026-11-08",
+      "date": "2026-11-09",
       "stars": 4634
     },
     "VectifyAI/PageIndex": {
-      "date": "2026-11-08",
-      "stars": 40179
+      "date": "2026-11-09",
+      "stars": 40268
     },
     "WangRongsheng/awesome-LLM-resources": {
-      "date": "2026-11-08",
-      "stars": 9071
+      "date": "2026-11-09",
+      "stars": 9069
     },
     "a2aproject/A2A": {
-      "date": "2026-11-08",
-      "stars": 26446
+      "date": "2026-11-09",
+      "stars": 26460
     },
     "aaif-goose/goose": {
-      "date": "2026-11-08",
-      "stars": 56343
+      "date": "2026-11-09",
+      "stars": 56384
     },
     "academic/awesome-datascience": {
-      "date": "2026-11-08",
-      "stars": 30301
+      "date": "2026-11-09",
+      "stars": 30308
     },
     "affaan-m/ECC": {
-      "date": "2026-11-08",
-      "stars": 299336
+      "date": "2026-11-09",
+      "stars": 299847
     },
     "ageitgey/face_recognition": {
       "date": "2026-10-23",
       "stars": 56848
     },
     "agentscope-ai/QwenPaw": {
-      "date": "2026-11-08",
-      "stars": 37470
+      "date": "2026-11-09",
+      "stars": 37522
     },
     "agentscope-ai/agentscope": {
-      "date": "2026-11-08",
-      "stars": 35579
+      "date": "2026-11-09",
+      "stars": 35658
     },
     "ahujasid/mcp-for-blender": {
-      "date": "2026-11-08",
-      "stars": 33598
+      "date": "2026-11-09",
+      "stars": 33713
     },
     "ai-job-search-dev/ai-job-search": {
-      "date": "2026-11-08",
-      "stars": 70345
+      "date": "2026-11-09",
+      "stars": 70709
     },
     "aishwaryanr/awesome-generative-ai-guide": {
-      "date": "2026-11-08",
-      "stars": 30179
+      "date": "2026-11-09",
+      "stars": 30200
     },
     "alibaba/arthas": {
-      "date": "2026-11-08",
-      "stars": 37612
+      "date": "2026-11-09",
+      "stars": 37613
     },
     "alibaba/open-code-review": {
-      "date": "2026-11-08",
-      "stars": 49636
+      "date": "2026-11-09",
+      "stars": 49684
     },
     "alicevision/Meshroom": {
-      "date": "2026-11-08",
-      "stars": 13067
+      "date": "2026-11-09",
+      "stars": 13074
     },
     "apache/airflow": {
-      "date": "2026-11-08",
-      "stars": 47418
+      "date": "2026-11-09",
+      "stars": 47420
     },
     "asgeirtj/system_prompts_leaks": {
-      "date": "2026-11-08",
-      "stars": 71013
+      "date": "2026-11-09",
+      "stars": 71062
     },
     "ashishpatel26/500-AI-Machine-learning-Deep-learning-Computer-vision-NLP-Projects-with-code": {
-      "date": "2026-11-08",
-      "stars": 37677
+      "date": "2026-11-09",
+      "stars": 37689
     },
     "bghira/SimpleTuner": {
-      "date": "2026-11-08",
-      "stars": 2953
+      "date": "2026-11-09",
+      "stars": 2955
     },
     "bharathgs/Awesome-pytorch-list": {
-      "date": "2026-11-08",
-      "stars": 16744
+      "date": "2026-11-09",
+      "stars": 16747
     },
     "bojieli/ai-agent-book": {
-      "date": "2026-11-08",
-      "stars": 57431
+      "date": "2026-11-09",
+      "stars": 57537
     },
     "browser-use/browser-use": {
-      "date": "2026-11-08",
-      "stars": 120287
+      "date": "2026-11-09",
+      "stars": 120388
     },
     "bytedance/UI-TARS-desktop": {
-      "date": "2026-11-08",
-      "stars": 39570
+      "date": "2026-11-09",
+      "stars": 39585
     },
     "bytedance/deer-flow": {
-      "date": "2026-11-08",
-      "stars": 85118
+      "date": "2026-11-09",
+      "stars": 85166
     },
     "calesthio/OpenMontage": {
       "date": "2026-11-07",
       "stars": 77882
     },
     "camel-ai/camel": {
-      "date": "2026-11-08",
-      "stars": 18020
+      "date": "2026-11-09",
+      "stars": 18022
     },
     "carla-simulator/carla": {
-      "date": "2026-11-08",
-      "stars": 14577
+      "date": "2026-11-09",
+      "stars": 14580
     },
     "cheaper-inference/OmniRoute": {
-      "date": "2026-11-08",
-      "stars": 85526
+      "date": "2026-11-09",
+      "stars": 85795
     },
     "code-yeongyu/oh-my-openagent": {
-      "date": "2026-11-08",
-      "stars": 70773
+      "date": "2026-11-09",
+      "stars": 70794
     },
     "colmap/colmap": {
-      "date": "2026-11-08",
-      "stars": 13177
+      "date": "2026-11-09",
+      "stars": 13181
     },
     "continuedev/continue": {
-      "date": "2026-11-08",
-      "stars": 36428
+      "date": "2026-11-09",
+      "stars": 36439
     },
     "coreyhaines31/marketingskills": {
       "date": "2026-10-27",
       "stars": 56755
     },
     "coze-dev/coze-studio": {
-      "date": "2026-11-08",
-      "stars": 21805
+      "date": "2026-11-09",
+      "stars": 21807
     },
     "crewAIInc/crewAI": {
       "date": "2026-10-27",
       "stars": 60151
     },
     "cvat-ai/cvat": {
-      "date": "2026-11-08",
-      "stars": 17095
+      "date": "2026-11-09",
+      "stars": 17100
     },
     "datawhalechina/happy-llm": {
-      "date": "2026-11-08",
-      "stars": 34806
+      "date": "2026-11-09",
+      "stars": 34826
     },
     "datawhalechina/hello-agents": {
-      "date": "2026-11-08",
-      "stars": 86379
+      "date": "2026-11-09",
+      "stars": 86481
     },
     "davisking/dlib": {
-      "date": "2026-11-08",
+      "date": "2026-11-09",
       "stars": 14472
     },
     "daytonaio/daytona": {
-      "date": "2026-11-08",
-      "stars": 71351
+      "date": "2026-11-09",
+      "stars": 71345
     },
     "deepfakes/faceswap": {
-      "date": "2026-11-08",
-      "stars": 57604
+      "date": "2026-11-09",
+      "stars": 57609
     },
     "deepseek-ai/deepseek-harness": {
-      "date": "2026-11-08",
-      "stars": 276012
+      "date": "2026-11-09",
+      "stars": 276969
     },
     "deepset-ai/haystack": {
-      "date": "2026-11-08",
-      "stars": 26943
+      "date": "2026-11-09",
+      "stars": 26944
     },
     "deepspeedai/DeepSpeed": {
-      "date": "2026-11-08",
+      "date": "2026-11-09",
       "stars": 43313
     },
     "deezer/spleeter": {
-      "date": "2026-11-08",
+      "date": "2026-11-09",
       "stars": 28517
     },
     "diegosouzapw/OmniRoute": {
@@ -2294,36 +2290,36 @@
       "stars": 79074
     },
     "dipakkr/awesome-ai-engineering": {
-      "date": "2026-11-08",
-      "stars": 22541
+      "date": "2026-11-09",
+      "stars": 22540
     },
     "dyad-sh/dyad": {
-      "date": "2026-11-08",
-      "stars": 22231
+      "date": "2026-11-09",
+      "stars": 22236
     },
     "e2b-dev/awesome-ai-agents": {
-      "date": "2026-11-08",
-      "stars": 30848
+      "date": "2026-11-09",
+      "stars": 30868
     },
     "elder-plinius/L1B3RT4S": {
-      "date": "2026-11-08",
-      "stars": 23203
+      "date": "2026-11-09",
+      "stars": 23221
     },
     "esengine/DeepSeek-Reasonix": {
-      "date": "2026-11-08",
-      "stars": 36132
+      "date": "2026-11-09",
+      "stars": 36138
     },
     "explosion/spaCy": {
-      "date": "2026-11-08",
+      "date": "2026-11-09",
       "stars": 34037
     },
     "f/prompts.chat": {
-      "date": "2026-11-08",
-      "stars": 176340
+      "date": "2026-11-09",
+      "stars": 176635
     },
     "farion1231/cc-switch": {
-      "date": "2026-11-08",
-      "stars": 152658
+      "date": "2026-11-09",
+      "stars": 152944
     },
     "fastai/fastai": {
       "date": "2026-10-28",
@@ -2334,524 +2330,520 @@
       "stars": 38092
     },
     "firecrawl/firecrawl": {
-      "date": "2026-11-08",
-      "stars": 199605
+      "date": "2026-11-09",
+      "stars": 199919
     },
     "google-ai-edge/mediapipe": {
-      "date": "2026-11-08",
-      "stars": 37601
+      "date": "2026-11-09",
+      "stars": 37617
     },
     "google-gemini/gemini-cli": {
-      "date": "2026-11-08",
-      "stars": 108774
+      "date": "2026-11-09",
+      "stars": 108797
     },
     "google-research/google-research": {
-      "date": "2026-11-08",
-      "stars": 39132
+      "date": "2026-11-09",
+      "stars": 39146
     },
     "google/langextract": {
-      "date": "2026-11-08",
-      "stars": 39280
+      "date": "2026-11-09",
+      "stars": 39289
     },
     "gradio-app/gradio": {
-      "date": "2026-11-08",
-      "stars": 44002
+      "date": "2026-11-09",
+      "stars": 44005
     },
     "guochengqian/Magic123": {
       "date": "2026-11-03",
       "stars": 1623
     },
     "hacksider/Deep-Live-Cam": {
-      "date": "2026-11-08",
-      "stars": 97799
+      "date": "2026-11-09",
+      "stars": 97851
     },
     "haidog-yaqub/MeanFlow": {
-      "date": "2026-11-08",
+      "date": "2026-11-09",
       "stars": 1213
     },
     "hao-ai-lab/FastVideo": {
-      "date": "2026-11-08",
-      "stars": 4792
+      "date": "2026-11-09",
+      "stars": 4796
     },
     "harry0703/MoneyPrinterTurbo": {
-      "date": "2026-11-08",
-      "stars": 140860
+      "date": "2026-11-09",
+      "stars": 141257
     },
     "harvard-edge/cs249r_book": {
-      "date": "2026-11-08",
-      "stars": 30017
+      "date": "2026-11-09",
+      "stars": 30076
     },
     "headroomlabs-ai/headroom": {
-      "date": "2026-11-08",
-      "stars": 79103
+      "date": "2026-11-09",
+      "stars": 79188
     },
     "herdrdev/herdr": {
-      "date": "2026-11-08",
-      "stars": 49215
+      "date": "2026-11-09",
+      "stars": 49561
     },
     "heygen-com/hyperframes": {
-      "date": "2026-11-08",
-      "stars": 80715
+      "date": "2026-11-09",
+      "stars": 81306
     },
     "hiyouga/LlamaFactory": {
-      "date": "2026-11-08",
-      "stars": 75933
+      "date": "2026-11-09",
+      "stars": 75954
     },
     "hpcaitech/ColossalAI": {
-      "date": "2026-11-08",
-      "stars": 41429
+      "date": "2026-11-09",
+      "stars": 41431
     },
     "huggingface/datasets": {
-      "date": "2026-11-08",
-      "stars": 22117
+      "date": "2026-11-09",
+      "stars": 22121
     },
     "huggingface/diffusers": {
-      "date": "2026-11-08",
-      "stars": 34886
+      "date": "2026-11-09",
+      "stars": 34890
     },
     "huggingface/finetrainers": {
-      "date": "2026-11-08",
+      "date": "2026-11-09",
       "stars": 1364
     },
     "huggingface/transformers": {
-      "date": "2026-11-08",
-      "stars": 168642
+      "date": "2026-11-09",
+      "stars": 168684
     },
     "huginn/huginn": {
-      "date": "2026-11-08",
-      "stars": 50402
+      "date": "2026-11-09",
+      "stars": 50446
     },
     "hypit-ai/hypit": {
-      "date": "2026-11-08",
-      "stars": 28508
+      "date": "2026-11-09",
+      "stars": 28686
     },
     "infiniflow/ragflow": {
-      "date": "2026-11-08",
-      "stars": 93748
+      "date": "2026-11-09",
+      "stars": 93819
     },
     "invoke-ai/InvokeAI": {
-      "date": "2026-11-08",
-      "stars": 29019
+      "date": "2026-11-09",
+      "stars": 29036
     },
     "jacobgil/pytorch-grad-cam": {
-      "date": "2026-11-08",
+      "date": "2026-11-09",
       "stars": 13011
     },
     "jeecgboot/JeecgBoot": {
-      "date": "2026-11-08",
-      "stars": 48397
+      "date": "2026-11-09",
+      "stars": 48407
     },
     "jingyaogong/minimind": {
-      "date": "2026-11-08",
-      "stars": 65003
+      "date": "2026-11-09",
+      "stars": 65039
     },
     "keras-team/keras": {
-      "date": "2026-11-08",
-      "stars": 64415
+      "date": "2026-11-09",
+      "stars": 64418
     },
     "khoj-ai/khoj": {
-      "date": "2026-11-08",
-      "stars": 38054
+      "date": "2026-11-09",
+      "stars": 38079
     },
     "kmario23/deep-learning-drizzle": {
-      "date": "2026-11-08",
-      "stars": 12984
+      "date": "2026-11-09",
+      "stars": 12985
     },
     "koala73/worldmonitor": {
-      "date": "2026-11-08",
-      "stars": 90332
+      "date": "2026-11-09",
+      "stars": 90399
     },
     "kornia/kornia": {
-      "date": "2026-11-08",
-      "stars": 12353
+      "date": "2026-11-09",
+      "stars": 12361
     },
     "labmlai/annotated_deep_learning_paper_implementations": {
-      "date": "2026-11-08",
-      "stars": 67719
+      "date": "2026-11-09",
+      "stars": 67730
     },
     "langchain-ai/langchain": {
-      "date": "2026-11-08",
-      "stars": 149188
+      "date": "2026-11-09",
+      "stars": 149250
     },
     "langchain-ai/langgraph": {
-      "date": "2026-11-08",
-      "stars": 44638
+      "date": "2026-11-09",
+      "stars": 44679
     },
     "langflow-ai/langflow": {
-      "date": "2026-11-08",
-      "stars": 156434
+      "date": "2026-11-09",
+      "stars": 156459
     },
     "langfuse/langfuse": {
-      "date": "2026-11-08",
-      "stars": 37139
+      "date": "2026-11-09",
+      "stars": 37177
     },
     "langgenius/dify": {
-      "date": "2026-11-08",
-      "stars": 160645
+      "date": "2026-11-09",
+      "stars": 160732
     },
     "liyupi/ai-guide": {
-      "date": "2026-11-08",
-      "stars": 21944
+      "date": "2026-11-09",
+      "stars": 21961
     },
     "lobehub/lobehub": {
-      "date": "2026-11-08",
-      "stars": 84365
+      "date": "2026-11-09",
+      "stars": 84512
     },
     "lucidrains/vit-pytorch": {
-      "date": "2026-11-08",
-      "stars": 25560
+      "date": "2026-11-09",
+      "stars": 25562
     },
     "ludwig-ai/ludwig": {
       "date": "2026-11-05",
       "stars": 11793
     },
     "lutzroeder/netron": {
-      "date": "2026-11-08",
-      "stars": 33664
+      "date": "2026-11-09",
+      "stars": 33666
     },
     "lyogavin/airllm": {
-      "date": "2026-11-08",
-      "stars": 41949
+      "date": "2026-11-09",
+      "stars": 42032
     },
     "marimo-team/marimo": {
-      "date": "2026-11-08",
-      "stars": 23470
+      "date": "2026-11-09",
+      "stars": 23480
     },
     "mem0ai/mem0": {
-      "date": "2026-11-08",
-      "stars": 68602
+      "date": "2026-11-09",
+      "stars": 68672
     },
     "microsoft/AI-For-Beginners": {
-      "date": "2026-11-08",
-      "stars": 70630
+      "date": "2026-11-09",
+      "stars": 70655
     },
     "microsoft/AirSim": {
-      "date": "2026-11-08",
-      "stars": 18607
+      "date": "2026-11-09",
+      "stars": 18605
     },
     "microsoft/ML-For-Beginners": {
-      "date": "2026-11-08",
-      "stars": 92063
+      "date": "2026-11-09",
+      "stars": 92084
     },
     "microsoft/ai-agents-for-beginners": {
-      "date": "2026-11-08",
-      "stars": 79147
+      "date": "2026-11-09",
+      "stars": 79236
     },
     "microsoft/generative-ai-for-beginners": {
-      "date": "2026-11-08",
-      "stars": 123113
+      "date": "2026-11-09",
+      "stars": 123198
     },
     "microsoft/graphrag": {
-      "date": "2026-11-08",
-      "stars": 36591
+      "date": "2026-11-09",
+      "stars": 36602
     },
     "microsoft/qlib": {
-      "date": "2026-11-08",
-      "stars": 50118
+      "date": "2026-11-09",
+      "stars": 50149
     },
     "microsoft/semantic-kernel": {
-      "date": "2026-11-08",
-      "stars": 28745
+      "date": "2026-11-09",
+      "stars": 28747
     },
     "milvus-io/milvus": {
-      "date": "2026-11-08",
-      "stars": 46613
+      "date": "2026-11-09",
+      "stars": 46615
     },
     "mlfoundations/open_clip": {
-      "date": "2026-11-08",
+      "date": "2026-11-09",
       "stars": 14247
     },
     "morluto/rea": {
-      "date": "2026-11-08",
-      "stars": 441869
+      "date": "2026-11-09",
+      "stars": 444986
     },
     "mudler/LocalAI": {
       "date": "2026-11-08",
       "stars": 50248
     },
     "n8n-io/n8n": {
-      "date": "2026-11-08",
-      "stars": 209798
+      "date": "2026-11-09",
+      "stars": 209888
     },
     "nautechsystems/nautilus_trader": {
-      "date": "2026-11-08",
-      "stars": 31353
+      "date": "2026-11-09",
+      "stars": 31386
     },
     "netdata/netdata": {
-      "date": "2026-11-08",
-      "stars": 81299
+      "date": "2026-11-09",
+      "stars": 81320
     },
     "neuml/txtai": {
-      "date": "2026-11-08",
-      "stars": 13116
+      "date": "2026-11-09",
+      "stars": 13190
     },
     "nunchux-ai/nunchaku": {
-      "date": "2026-11-08",
+      "date": "2026-11-09",
       "stars": 3966
     },
     "ollama/ollama": {
-      "date": "2026-11-08",
-      "stars": 186316
+      "date": "2026-11-09",
+      "stars": 186417
     },
     "open-webui/open-webui": {
-      "date": "2026-11-08",
-      "stars": 158070
+      "date": "2026-11-09",
+      "stars": 158175
     },
     "openbq-org/OpenBB": {
-      "date": "2026-11-08",
-      "stars": 75225
+      "date": "2026-11-09",
+      "stars": 75260
     },
     "opencv/opencv": {
-      "date": "2026-11-08",
-      "stars": 91482
+      "date": "2026-11-09",
+      "stars": 91487
     },
     "openvinotoolkit/openvino": {
-      "date": "2026-11-08",
-      "stars": 11129
+      "date": "2026-11-09",
+      "stars": 11136
     },
     "paperclipai/paperclip": {
-      "date": "2026-11-08",
-      "stars": 112112
+      "date": "2026-11-09",
+      "stars": 112438
     },
     "paperless-ngx/paperless-ngx": {
-      "date": "2026-11-08",
-      "stars": 47858
+      "date": "2026-11-09",
+      "stars": 47926
     },
     "patchy631/ai-engineering-hub": {
-      "date": "2026-11-08",
-      "stars": 41459
+      "date": "2026-11-09",
+      "stars": 41532
     },
     "pathwaycom/llm-app": {
       "date": "2026-10-14",
       "stars": 58792
     },
     "pathwaycom/serviette": {
-      "date": "2026-11-08",
-      "stars": 58720
+      "date": "2026-11-09",
+      "stars": 58723
     },
     "photoprism/photoprism": {
-      "date": "2026-11-08",
-      "stars": 40424
+      "date": "2026-11-09",
+      "stars": 40423
     },
     "pingcap/tidb": {
-      "date": "2026-11-08",
-      "stars": 40719
+      "date": "2026-11-09",
+      "stars": 40721
     },
     "punkpeye/awesome-mcp-servers": {
-      "date": "2026-11-08",
-      "stars": 97455
+      "date": "2026-11-09",
+      "stars": 97507
     },
     "pytorch/pytorch": {
-      "date": "2026-11-08",
-      "stars": 105249
+      "date": "2026-11-09",
+      "stars": 105276
     },
     "pytorch/vision": {
-      "date": "2026-11-08",
-      "stars": 17990
+      "date": "2026-11-09",
+      "stars": 17992
     },
     "qubvel-org/segmentation_models.pytorch": {
-      "date": "2026-11-08",
-      "stars": 11799
+      "date": "2026-11-09",
+      "stars": 11801
     },
     "rasbt/LLMs-from-scratch": {
-      "date": "2026-11-08",
-      "stars": 107990
+      "date": "2026-11-09",
+      "stars": 108059
     },
     "ray-project/ray": {
-      "date": "2026-11-08",
-      "stars": 44234
+      "date": "2026-11-09",
+      "stars": 44241
     },
     "recommenders-team/recommenders": {
       "date": "2026-10-21",
       "stars": 21959
     },
     "roboflow/supervision": {
-      "date": "2026-11-08",
-      "stars": 51548
+      "date": "2026-11-09",
+      "stars": 51562
     },
     "rohitg00/ai-engineering-from-scratch": {
-      "date": "2026-11-08",
-      "stars": 77655
+      "date": "2026-11-09",
+      "stars": 77911
     },
     "rowboatlabs/rowboat": {
-      "date": "2026-11-08",
-      "stars": 18147
+      "date": "2026-11-09",
+      "stars": 18146
     },
     "rtk-ai/rtk": {
-      "date": "2026-11-08",
-      "stars": 85861
+      "date": "2026-11-09",
+      "stars": 85967
     },
     "run-llama/llama_index": {
-      "date": "2026-11-08",
-      "stars": 52842
+      "date": "2026-11-09",
+      "stars": 52854
+    },
+    "ruvnet/RuView": {
+      "date": "2026-11-09",
+      "stars": 103119
     },
     "ruvnet/ruflo": {
-      "date": "2026-11-08",
-      "stars": 81202
+      "date": "2026-11-09",
+      "stars": 81311
     },
     "sansan0/TrendRadar": {
-      "date": "2026-11-08",
-      "stars": 63520
+      "date": "2026-11-09",
+      "stars": 63536
     },
     "scikit-learn/scikit-learn": {
-      "date": "2026-11-08",
-      "stars": 68089
+      "date": "2026-11-09",
+      "stars": 68102
     },
     "scraed/LanPaint": {
-      "date": "2026-11-08",
+      "date": "2026-11-09",
       "stars": 1483
     },
     "screenpipe/screenpipe": {
-      "date": "2026-11-08",
-      "stars": 22266
+      "date": "2026-11-09",
+      "stars": 22287
     },
     "shadcn-ui/ui": {
-      "date": "2026-11-08",
-      "stars": 127599
+      "date": "2026-11-09",
+      "stars": 127672
     },
     "shanraisshan/claude-code-best-practice": {
-      "date": "2026-11-08",
-      "stars": 68792
+      "date": "2026-11-09",
+      "stars": 68860
     },
     "shareAI-lab/learn-claude-code": {
-      "date": "2026-11-08",
-      "stars": 80032
+      "date": "2026-11-09",
+      "stars": 80104
     },
     "shivammehta25/Matcha-TTS": {
-      "date": "2026-11-08",
-      "stars": 1371
+      "date": "2026-11-09",
+      "stars": 1370
     },
     "showlab/Awesome-Video-Diffusion": {
-      "date": "2026-11-08",
-      "stars": 5831
+      "date": "2026-11-09",
+      "stars": 5833
     },
     "sickn33/agentic-awesome-skills": {
       "date": "2026-10-12",
       "stars": 47482
     },
     "simstudioai/sim": {
-      "date": "2026-11-08",
-      "stars": 30071
+      "date": "2026-11-09",
+      "stars": 30109
     },
     "spmallick/learnopencv": {
-      "date": "2026-11-08",
-      "stars": 23238
+      "date": "2026-11-09",
+      "stars": 23241
     },
     "stablyai/orca": {
-      "date": "2026-11-08",
-      "stars": 118811
+      "date": "2026-11-09",
+      "stars": 119709
     },
     "stas00/ml-engineering": {
-      "date": "2026-11-08",
-      "stars": 19681
+      "date": "2026-11-09",
+      "stars": 19688
     },
     "stefan-jansen/machine-learning-for-trading": {
-      "date": "2026-11-08",
-      "stars": 21751
+      "date": "2026-11-09",
+      "stars": 21763
     },
     "steven2358/awesome-generative-ai": {
-      "date": "2026-11-08",
-      "stars": 12816
+      "date": "2026-11-09",
+      "stars": 12818
     },
     "streamlit/streamlit": {
-      "date": "2026-11-08",
-      "stars": 46269
+      "date": "2026-11-09",
+      "stars": 46281
     },
     "tensorflow/tensorflow": {
-      "date": "2026-11-08",
-      "stars": 201391
-    },
-    "tensorzero/tensorzero": {
-      "date": "2026-10-09",
-      "stars": 11711
+      "date": "2026-11-09",
+      "stars": 201407
     },
     "tesseract-ocr/tesseract": {
-      "date": "2026-11-08",
-      "stars": 77407
+      "date": "2026-11-09",
+      "stars": 77419
     },
     "thedaviddias/Front-End-Checklist": {
-      "date": "2026-11-08",
-      "stars": 74674
+      "date": "2026-11-09",
+      "stars": 74680
     },
     "thedotmack/claude-mem": {
-      "date": "2026-11-08",
-      "stars": 114622
+      "date": "2026-11-09",
+      "stars": 115095
     },
     "thu-ml/TurboDiffusion": {
-      "date": "2026-11-08",
+      "date": "2026-11-09",
       "stars": 3859
     },
     "transformerlab/transformerlab-app": {
-      "date": "2026-11-08",
+      "date": "2026-11-09",
       "stars": 5200
     },
     "tt-a1i/archify": {
-      "date": "2026-11-08",
-      "stars": 94557
+      "date": "2026-11-09",
+      "stars": 94879
     },
     "ultralytics/ultralytics": {
-      "date": "2026-11-08",
-      "stars": 63206
+      "date": "2026-11-09",
+      "stars": 63228
     },
     "ultralytics/yolov5": {
-      "date": "2026-11-08",
+      "date": "2026-11-09",
       "stars": 58255
     },
     "unclecode/crawl4ai": {
-      "date": "2026-11-08",
-      "stars": 87074
+      "date": "2026-11-09",
+      "stars": 87127
     },
     "unslothai/unsloth": {
-      "date": "2026-11-08",
-      "stars": 79181
+      "date": "2026-11-09",
+      "stars": 79227
     },
     "upstash/context7": {
-      "date": "2026-11-08",
-      "stars": 64340
+      "date": "2026-11-09",
+      "stars": 64400
     },
     "usestrix/strix": {
-      "date": "2026-11-08",
-      "stars": 74312
+      "date": "2026-11-09",
+      "stars": 74517
     },
     "vercel/ai": {
-      "date": "2026-11-08",
-      "stars": 27805
+      "date": "2026-11-09",
+      "stars": 27827
     },
     "verl-project/verl-omni": {
-      "date": "2026-11-08",
-      "stars": 1472
+      "date": "2026-11-09",
+      "stars": 1481
     },
     "virgiliojr94/book-to-skill": {
-      "date": "2026-11-08",
-      "stars": 37231
+      "date": "2026-11-09",
+      "stars": 37422
     },
     "vllm-project/vllm": {
-      "date": "2026-11-08",
-      "stars": 96540
+      "date": "2026-11-09",
+      "stars": 96587
     },
     "wandb/openui": {
-      "date": "2026-11-08",
-      "stars": 22745
+      "date": "2026-11-09",
+      "stars": 22747
     },
     "wiltodelta/remove-ai-watermarks": {
       "date": "2026-10-17",
       "stars": 6032
     },
     "wkentaro/labelme": {
-      "date": "2026-11-08",
-      "stars": 16299
+      "date": "2026-11-09",
+      "stars": 16301
     },
     "wladradchenko/wunjo.wladradchenko.ru": {
-      "date": "2026-11-08",
+      "date": "2026-11-09",
       "stars": 1188
     },
     "yamadashy/repomix": {
-      "date": "2026-11-08",
-      "stars": 29183
-    },
-    "zhayujie/CowAgent": {
-      "date": "2026-10-09",
-      "stars": 47296
+      "date": "2026-11-09",
+      "stars": 29199
     }
   }
 }
