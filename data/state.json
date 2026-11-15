@@ -565,6 +565,7 @@
     "6822194774": "2026-10-21",
     "6822356428": "2026-10-19",
     "6822695409": "2026-11-01",
+    "6822738484": "2026-11-15",
     "6823045499": "2026-11-09",
     "6823260015": "2026-10-28",
     "6824686276": "2026-10-31",
@@ -577,6 +578,7 @@
     "6829215393": "2026-11-11",
     "6829688301": "2026-11-14",
     "6830004679": "2026-11-07",
+    "6831618502": "2026-11-15",
     "6832432299": "2026-11-14",
     "6833103142": "2026-11-14",
     "6833608280": "2026-11-14",
@@ -805,6 +807,7 @@
     "https://sspai.com/post/118276": "2026-11-14",
     "https://sspai.com/post/118317": "2026-11-03",
     "https://sspai.com/post/118366": "2026-11-12",
+    "https://sspai.com/post/118392": "2026-11-15",
     "https://sspai.com/post/118402": "2026-11-04",
     "https://sspai.com/post/118404": "2026-11-04",
     "https://sspai.com/post/118458": "2026-11-11",
@@ -1570,6 +1573,7 @@
     "https://www.producthunt.com/products/raah-dev": "2026-11-01",
     "https://www.producthunt.com/products/radaric": "2026-10-22",
     "https://www.producthunt.com/products/ragelayer": "2026-10-28",
+    "https://www.producthunt.com/products/rakazo": "2026-11-15",
     "https://www.producthunt.com/products/rankcontrol": "2026-09-23",
     "https://www.producthunt.com/products/reactive-resume": "2026-10-05",
     "https://www.producthunt.com/products/readywhen": "2026-10-19",
@@ -2694,6 +2698,10 @@
     "recommenders-team/recommenders": {
       "date": "2026-10-21",
       "stars": 21959
+    },
+    "rerun-io/rerun": {
+      "date": "2026-11-15",
+      "stars": 11810
     },
     "roboflow/supervision": {
       "date": "2026-11-15",
